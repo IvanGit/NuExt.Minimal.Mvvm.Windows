@@ -50,5 +50,4 @@ namespace System.Diagnostics
             _messageBuilder.Clear();
         }
     }
-
 }

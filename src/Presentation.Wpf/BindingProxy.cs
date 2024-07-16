@@ -1,9 +1,8 @@
 ﻿namespace System.Windows
 {
     /// <summary>
-    /// The BindingProxy class is used as a workaround to pass DataContext between elements
-    /// that do not have a direct binding path available. It inherits from Freezable,
-    /// allowing it to be utilized in XAML resources and enabling advanced binding scenarios.
+    /// The BindingProxy class is used to pass DataContext between elements without a direct binding path. 
+    /// Inherits from Freezable for use in XAML resources and advanced binding scenarios.
     /// </summary>
     /// <remarks>
     /// This class is particularly useful in WPF applications where you need to bind data
@@ -12,6 +11,7 @@
     /// 
     /// Example usage:
     /// <code>
+    /// <![CDATA[
     /// <Window.Resources>
     ///     <BindingProxy x:Key="proxy" DataContext="{Binding SomeViewModel}" />
     /// </Window.Resources>
@@ -19,6 +19,7 @@
     /// <Grid DataContext="{Binding Source={StaticResource proxy}, Path=DataContext}">
     ///     <!-- Your UI elements here -->
     /// </Grid>
+    /// ]]>
     /// </code>
     /// </remarks>
     public sealed class BindingProxy : Freezable

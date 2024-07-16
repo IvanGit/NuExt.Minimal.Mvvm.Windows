@@ -10,7 +10,7 @@ namespace System.Windows
     /// </summary>
     public static class WindowExtensions
     {
-        private static readonly JsonSerializerOptions s_serializerOptions = new()
+        internal static readonly JsonSerializerOptions SerializerOptions = new()
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
             IgnoreReadOnlyProperties = true,
@@ -51,7 +51,7 @@ namespace System.Windows
             }
             windowPlacement.WindowStyle = window.WindowStyle;
             windowPlacement.ResizeMode = window.ResizeMode;
-            string output = JsonSerializer.Serialize(windowPlacement, s_serializerOptions);
+            var output = JsonSerializer.Serialize(windowPlacement, SerializerOptions);
             return output;
         }
 
@@ -93,7 +93,7 @@ namespace System.Windows
             {
                 return false;
             }
-            var windowPlacement = JsonSerializer.Deserialize<WindowPlacement>(json!, s_serializerOptions);
+            var windowPlacement = JsonSerializer.Deserialize<WindowPlacement>(json!, SerializerOptions);
             return window.SetPlacement(windowPlacement);
         }
     }
