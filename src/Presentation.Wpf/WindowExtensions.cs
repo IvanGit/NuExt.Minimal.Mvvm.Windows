@@ -22,6 +22,32 @@ namespace System.Windows
         };
 
         /// <summary>
+        /// Brings the specified window to the front and sets focus on it.
+        /// </summary>
+        /// <param name="window">The window to bring to the front.</param>
+        /// <exception cref="ArgumentNullException">Thrown when the window is null.</exception>
+        public static void BringToFront(this Window window)
+        {
+#if NET6_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(window);
+#else
+            ThrowHelper.WhenNull(window);
+#endif
+            if (window.WindowState == WindowState.Minimized)
+            {
+                window.WindowState = WindowState.Normal;
+            }
+            if (window.Visibility != Visibility.Visible)
+            {
+                window.Show();
+            }
+            window.Activate();
+            window.Topmost = true;
+            window.Topmost = false;
+            window.Focus();
+        }
+
+        /// <summary>
         /// Retrieves the current placement (position and state) of the specified window.
         /// </summary>
         /// <param name="window">The instance of the <see cref="Window"/>.</param>
