@@ -31,7 +31,7 @@ namespace System.Windows
 #if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(window);
 #else
-            ThrowHelper.WhenNull(window);
+            Throw.IfNull(window);
 #endif
             if (window.WindowState == WindowState.Minimized)
             {
@@ -58,7 +58,7 @@ namespace System.Windows
 #if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(window);
 #else
-            ThrowHelper.WhenNull(window);
+            Throw.IfNull(window);
 #endif
             return WindowPlacement.GetPlacement(new WindowInteropHelper(window).Handle);
         }
@@ -92,7 +92,7 @@ namespace System.Windows
 #if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(window);
 #else
-            ThrowHelper.WhenNull(window);
+            Throw.IfNull(window);
 #endif
             if (windowPlacement is null)
             {
