@@ -22,10 +22,10 @@
     /// ]]>
     /// </code>
     /// </remarks>
-    public sealed class BindingProxy : Freezable
+    public class BindingProxy : Freezable
     {
         // DependencyProperty to hold the DataContext.
-        public static readonly DependencyProperty DataContextProperty = DependencyProperty.Register(nameof(DataContext), typeof(object), typeof(BindingProxy), new PropertyMetadata(null));
+        public static readonly DependencyProperty DataContextProperty = DependencyProperty.Register(nameof(DataContext), typeof(object), typeof(BindingProxy), new PropertyMetadata(null, (d, e) => ((BindingProxy)d).OnDataContextChanged(e.NewValue, e.OldValue)));
 
         /// <summary>
         /// Gets or sets the DataContext for this <see cref="BindingProxy"/>.
@@ -45,6 +45,10 @@
         protected override Freezable CreateInstanceCore()
         {
             return new BindingProxy();
+        }
+
+        protected virtual void OnDataContextChanged(object? newValue, object? oldValue)
+        {
         }
     }
 }
