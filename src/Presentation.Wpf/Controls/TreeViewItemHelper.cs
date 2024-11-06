@@ -42,8 +42,7 @@ namespace System.Windows.Controls
             // regenerate the visuals because they may have been virtualized away.
 
             container.ApplyTemplate();
-            ItemsPresenter? itemsPresenter =
-                (ItemsPresenter?)container.Template.FindName("ItemsHost", container);
+            var itemsPresenter = (ItemsPresenter?)container.Template.FindName("ItemsHost", container);
             if (itemsPresenter != null)
             {
                 itemsPresenter.ApplyTemplate();
@@ -52,12 +51,12 @@ namespace System.Windows.Controls
             {
                 // The Tree template has not named the ItemsPresenter,
                 // so walk the descendents and find the child.
-                itemsPresenter = FindVisualChild<ItemsPresenter>(container);
+                itemsPresenter = container.FindChild<ItemsPresenter>();
                 if (itemsPresenter == null)
                 {
                     container.UpdateLayout();
 
-                    itemsPresenter = FindVisualChild<ItemsPresenter>(container);
+                    itemsPresenter = container.FindChild<ItemsPresenter>();
                 }
             }
 
@@ -66,8 +65,8 @@ namespace System.Windows.Controls
 
             Panel itemsHostPanel = (Panel)VisualTreeHelper.GetChild(itemsPresenter, 0);
 
-            // Ensure that the generator for this panel has been created.
 #pragma warning disable IDE0059
+            // Ensure that the generator for this panel has been created.
             UIElementCollection children = itemsHostPanel.Children;
 #pragma warning restore IDE0059
 
@@ -112,35 +111,6 @@ namespace System.Windows.Controls
                         // The object is not under this TreeViewItem
                         // so collapse it.
                         subContainer.IsExpanded = false;
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Search for an element of a certain type in the visual tree.
-        /// </summary>
-        /// <typeparam name="T">The type of element to find.</typeparam>
-        /// <param name="visual">The parent element.</param>
-        /// <returns></returns>
-        private static T? FindVisualChild<T>(Visual visual) where T : Visual
-        {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(visual); i++)
-            {
-                Visual? child = (Visual?)VisualTreeHelper.GetChild(visual, i);
-                if (child != null)
-                {
-                    if (child is T correctlyTyped)
-                    {
-                        return correctlyTyped;
-                    }
-
-                    T? descendent = FindVisualChild<T>(child);
-                    if (descendent != null)
-                    {
-                        return descendent;
                     }
                 }
             }

@@ -41,7 +41,9 @@
     public class BindingProxy<T>: Freezable where T: class
     {
         // DependencyProperty to hold the DataContext of type T.
-        public static readonly DependencyProperty DataContextProperty = DependencyProperty.Register(nameof(DataContext), typeof(T), typeof(BindingProxy<T>), new PropertyMetadata(null, (d, e) => ((BindingProxy<T>)d).OnDataContextChanged(e.NewValue as T, e.OldValue as T)));
+        public static readonly DependencyProperty DataContextProperty = DependencyProperty.Register(
+            nameof(DataContext), typeof(T), typeof(BindingProxy<T>), 
+            new PropertyMetadata(null, (d, e) => ((BindingProxy<T>)d).OnDataContextChanged(e.OldValue as T, e.NewValue as T)));
 
         /// <summary>
         /// Gets or sets the DataContext for this <see cref="BindingProxy{T}"/>.
@@ -58,12 +60,12 @@
         /// </summary>
         /// <returns>A new instance of <see cref="BindingProxy{T}"/>.</returns>
         /// <seealso cref="Freezable.CreateInstanceCore()"/>
-        protected override Freezable CreateInstanceCore()
+        protected override Freezable? CreateInstanceCore()
         {
-            return new BindingProxy<T>();
+            return (Freezable?)Activator.CreateInstance(GetType());
         }
 
-        protected virtual void OnDataContextChanged(T? newValue, T? oldValue)
+        protected virtual void OnDataContextChanged(T? oldValue, T? newValue)
         {
         }
     }
