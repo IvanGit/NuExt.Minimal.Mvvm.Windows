@@ -1,0 +1,29 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:minimal="clr-namespace:Minimal.Mvvm.Windows"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    mc:Ignorable="d">
+
+    <DataTemplate x:Key="Templates.InputDialog.Button.Default" d:DataType="{x:Type minimal:UICommand}">
+        <Button Margin="0 5 5 5" MinHeight="25" MinWidth="50" UseLayoutRounding="True"
+                Command="{Binding Command}"
+                Content="{Binding Content}"
+                IsCancel="{Binding IsCancel}"
+                IsDefault="{Binding IsDefault}"
+                Style="{DynamicResource MahApps.Styles.Button.Dialogs.Accent}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="Templates.InputDialog.Button" d:DataType="{x:Type minimal:UICommand}">
+        <Button Margin="0 5 5 5" MinHeight="25" MinWidth="50" UseLayoutRounding="True"
+                Command="{Binding Command}"
+                Content="{Binding Content}"
+                IsCancel="{Binding IsCancel}"
+                IsDefault="{Binding IsDefault}"
+                Style="{DynamicResource MahApps.Styles.Button.Dialogs}" />
+    </DataTemplate>
+
+    <minimal:DialogButtonTemplateSelector x:Key="InputDialogButtonTemplateSelector"
+                                          DefaultButtonTemplate="{StaticResource Templates.InputDialog.Button.Default}"
+                                          ButtonTemplate="{StaticResource Templates.InputDialog.Button}" />
+</ResourceDictionary>

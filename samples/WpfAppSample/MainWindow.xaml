@@ -1,0 +1,64 @@
+﻿<Window x:Class="WpfAppSample.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:minimal="http://schemas.minimalmvvm.com/winfx/xaml/mvvm"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:WpfAppSample.ViewModels"
+        xmlns:controlzex="urn:controlzex"
+        xmlns:views="clr-namespace:WpfAppSample.Views"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance {x:Type viewModels:MainWindowViewModel}, IsDesignTimeCreatable=True}"
+        ResizeMode="CanResizeWithGrip"
+        WindowStartupLocation="CenterScreen"
+        Title="{Binding Title, TargetNullValue='Untitled'}" Height="450" Width="800" MinHeight="450" MinWidth="800">
+    <minimal:Interaction.Behaviors>
+        <minimal:WindowService/>
+        <minimal:InputDialogService/>
+        <minimal:EventTrigger EventName="Closing" Command="{Binding ClosingCommand}" PassEventArgsToCommand="True" />
+        <minimal:EventTrigger EventName="ContentRendered" Command="{Binding ContentRenderedCommand}"/>
+        <minimal:EventTrigger EventName="Loaded" Command="{Binding LoadedCommand}" />
+        <minimal:KeyTrigger Gesture="CTRL+O" Command="{Binding ShowMoviesCommand}" />
+        <minimal:WindowPlacementService FileName="MainWindow" 
+                                        DirectoryName="{Binding EnvironmentService.SettingsDirectory, FallbackValue={x:Null}}"
+                                        PlacementRestoredCommand="{Binding PlacementRestoredCommand}" 
+                                        PlacementSavedCommand="{Binding PlacementSavedCommand}"/>
+        <minimal:SettingsService Prefix="MainWindow" 
+                                 DirectoryName="{Binding EnvironmentService.SettingsDirectory, FallbackValue={x:Null}}"/>
+    </minimal:Interaction.Behaviors>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Menu Grid.Row="0" ItemsSource="{Binding MenuItems}" ItemContainerStyle="{StaticResource Styles.MenuItem.Default}"/>
+
+        <controlzex:TabControlEx Grid.Row="1" TabStripPlacement="Top">
+            <minimal:Interaction.Behaviors>
+                <minimal:TabbedDocumentService x:Name="Documents" 
+                                                    ActiveDocument="{Binding ActiveDocument}"
+                                                    UnresolvedViewType="{x:Type views:ErrorView}">
+                    <minimal:Interaction.Behaviors>
+                        <minimal:EventTrigger EventName="ActiveDocumentChanged" Command="{Binding ActiveDocumentChangedCommand}"/>
+                    </minimal:Interaction.Behaviors>
+                </minimal:TabbedDocumentService>
+            </minimal:Interaction.Behaviors>
+        </controlzex:TabControlEx>
+
+        <StatusBar Grid.Row="2">
+            <StatusBarItem>
+                <TextBlock>
+                    <Run Text="Documents Opened:"/>
+                    <Run Text="{Binding Count, ElementName=Documents, Mode=OneWay}"/>
+                </TextBlock>
+            </StatusBarItem>
+            <Separator />
+            <StatusBarItem>
+                <TextBlock Text="{Binding Source={StaticResource AppBindingProxy}, Path=DataContext.PerformanceMonitor.FormattedUsage, FallbackValue={x:Null}}" />
+            </StatusBarItem>
+        </StatusBar>
+
+    </Grid>
+</Window>
