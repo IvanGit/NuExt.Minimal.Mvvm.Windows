@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0-windows;net6.0-windows;net462</TargetFrameworks>
+    <TargetFrameworks>net9.0-windows;net8.0-windows;net6.0-windows;net462</TargetFrameworks>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageTags>nuext;minimal;mvvm;wpf;ui;viewmodel;command;relaycommand;asynccommand;multiple;concurrent;async</PackageTags>
+    <PackageTags>nuext;minimal;mvvm;wpf;ui;windows;viewmodel;command;relaycommand;asynccommand;multiple;concurrent;async;servicecontainer</PackageTags>
     <Description>NuExt.Minimal.Mvvm.Windows is an extension for the lightweight MVVM framework NuExt.Minimal.Mvvm, specifically designed for WPF applications.
 
 Commonly Used Types:
@@ -23,7 +23,7 @@ Minimal.Mvvm.Windows.SettingsService
 Minimal.Mvvm.Windows.TabbedDocumentService
 Minimal.Mvvm.Windows.ViewLocator
 Minimal.Mvvm.Windows.WindowPlacementService</Description>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <RootNamespace>Minimal.Mvvm.Windows</RootNamespace>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
@@ -33,13 +33,15 @@ Minimal.Mvvm.Windows.WindowPlacementService</Description>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(UseNuExtPackages)' == 'true'">
-    <PackageReference Include="NuExt.Minimal.Mvvm" Version="0.1.6" />
-    <PackageReference Include="NuExt.System.Windows" Version="0.1.9" />
+    <PackageReference Include="NuExt.Minimal.Mvvm" Version="0.2.0" />
+    <PackageReference Include="NuExt.System.Windows" Version="0.2.0" />
+    <PackageReference Include="NuExt.Minimal.Mvvm.SourceGenerator" Version="0.2.0" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(UseNuExtPackages)' == 'false'">
     <ProjectReference Include="..\..\NuExt.Minimal.Mvvm\src\NuExt.Minimal.Mvvm.csproj" />
     <ProjectReference Include="..\..\NuExt.System.Windows\src\NuExt.System.Windows.csproj" />
+    <ProjectReference Include="..\..\NuExt.Minimal.Mvvm.SourceGenerator\src\NuExt.Minimal.Mvvm.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,22 +4,15 @@
     /// Provides a base class for view models that represent document content. 
     /// This class extends <see cref="ControlViewModel"/>.
     /// </summary>
-    public abstract class DocumentContentViewModelBase : ControlViewModel
+    public abstract partial class DocumentContentViewModelBase : ControlViewModel
     {
         #region Properties
 
-        private string? _title;
         /// <summary>
         /// Gets or sets the title of the document.
         /// </summary>
-        public string? Title
-        {
-            get => _title;
-            set => SetProperty(ref _title, value, t =>
-            {
-                var newTitle = Title;
-            });
-        }
+        [Notify]
+        private string? _title;
 
         #endregion
 

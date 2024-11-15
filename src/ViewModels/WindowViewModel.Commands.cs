@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
-using System.Windows;
 using System.Windows.Input;
+using static AccessModifier;
 
 namespace Minimal.Mvvm.Windows
 {
@@ -9,55 +9,35 @@ namespace Minimal.Mvvm.Windows
     {
         #region Commands
 
-        private ICommand? _contentRenderedCommand;
         /// <summary>
         /// Gets or sets the command that is executed when the content is rendered.
         /// </summary>
-        public ICommand? ContentRenderedCommand
-        {
-            get => _contentRenderedCommand;
-            private set => SetProperty(ref _contentRenderedCommand, value);
-        }
+        [Notify(Setter = Private)]
+        private ICommand? _contentRenderedCommand;
 
-        private ICommand? _closeCommand;
         /// <summary>
         /// Gets or sets the command that is executed to close the window.
         /// </summary>
-        public ICommand? CloseCommand
-        {
-            get => _closeCommand;
-            private set => SetProperty(ref _closeCommand, value);
-        }
+        [Notify(Setter = Private)]
+        private ICommand? _closeCommand;
 
-        private ICommand? _closingCommand;
         /// <summary>
         /// Gets or sets the command that is executed during the closing event of the window.
         /// </summary>
-        public ICommand? ClosingCommand
-        {
-            get => _closingCommand;
-            private set => SetProperty(ref _closingCommand, value);
-        }
+        [Notify(Setter = Private)]
+        private ICommand? _closingCommand;
 
-        private ICommand? _placementRestoredCommand;
         /// <summary>
         /// Gets or sets the command that is executed after the window placement has been restored.
         /// </summary>
-        public ICommand? PlacementRestoredCommand
-        {
-            get => _placementRestoredCommand;
-            private set => SetProperty(ref _placementRestoredCommand, value);
-        }
+        [Notify(Setter = Private)]
+        private ICommand? _placementRestoredCommand;
 
-        private ICommand? _placementSavedCommand;
         /// <summary>
         /// Gets or sets the command that is executed after the window placement has been saved.
         /// </summary>
-        public ICommand? PlacementSavedCommand
-        {
-            get => _placementSavedCommand;
-            private set => SetProperty(ref _placementSavedCommand, value);
-        }
+        [Notify(Setter = Private)]
+        private ICommand? _placementSavedCommand;
 
         #endregion
 

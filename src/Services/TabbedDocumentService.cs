@@ -72,7 +72,7 @@ namespace Minimal.Mvvm.Windows
 
             private void OnTabHeaderChanged(object? sender, EventArgs e)
             {
-                OnPropertyChanged(nameof(Title));
+                OnPropertyChanged(EventArgsCache.TitlePropertyChanged);
             }
 
             private void OnTabIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -423,5 +423,10 @@ namespace Minimal.Mvvm.Windows
         }
 
         #endregion
+    }
+
+    internal static partial class EventArgsCache
+    {
+        internal static readonly PropertyChangedEventArgs TitlePropertyChanged = new(nameof(IAsyncDocument.Title));
     }
 }

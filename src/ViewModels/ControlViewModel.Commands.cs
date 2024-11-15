@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using static AccessModifier;
 
 namespace Minimal.Mvvm.Windows
 {
@@ -14,25 +15,17 @@ namespace Minimal.Mvvm.Windows
 
         #region Commands
 
-        private ICommand? _loadedCommand;
         /// <summary>
         /// Command executed when the view is loaded.
         /// </summary>
-        public ICommand? LoadedCommand
-        {
-            get => _loadedCommand;
-            private set => SetProperty(ref _loadedCommand, value);
-        }
+        [Notify(Setter = Private)]
+        private ICommand? _loadedCommand;
 
-        private ICommand? _unloadedCommand;
         /// <summary>
         /// Command executed when the view is unloaded.
         /// </summary>
-        public ICommand? UnloadedCommand
-        {
-            get => _unloadedCommand;
-            private set => SetProperty(ref _unloadedCommand, value);
-        }
+        [Notify(Setter = Private)] 
+        private ICommand? _unloadedCommand;
 
         #endregion
 
@@ -56,7 +49,6 @@ namespace Minimal.Mvvm.Windows
 #if DEBUG_EVENTS
             Debug.WriteLine($"{GetType().FullName} ({DisplayName ?? "Unnamed"}) ({GetHashCode()})::OnUnloaded");
 #endif
-            Debug.Assert(false, "TODO remove this line");
         }
 
         #endregion

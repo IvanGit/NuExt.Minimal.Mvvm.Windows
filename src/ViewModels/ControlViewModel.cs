@@ -9,14 +9,13 @@ namespace Minimal.Mvvm.Windows
     /// </summary>
     public partial class ControlViewModel : ViewModelBase, IAsyncDisposable
     {
-        private static readonly PropertyChangedEventArgs s_isUsablePropertyChanged = new(nameof(IsUsable));
-
         public ControlViewModel()
         {
             if (IsInDesignMode)
             {
                 return;
             }
+            Lifetime.AddBracket(() => PropertyChanged += OnPropertyChanged, () => PropertyChanged -= OnPropertyChanged);
             Lifetime.AddBracket(CreateCommands, NullifyCommands);//last operation after WaitAsyncCommands
             Lifetime.AddAsync(() => WaitAsyncCommands());
         }
@@ -35,7 +34,13 @@ namespace Minimal.Mvvm.Windows
         public bool IsDisposed
         {
             get => _isDisposed;
-            private set => SetProperty(ref _isDisposed, value, () => OnPropertyChanged(s_isUsablePropertyChanged));
+            private set
+            {
+                if (_isDisposed == value) return;
+                _isDisposed = value;
+                OnPropertyChanged(EventArgsCache.IsDisposedPropertyChanged);
+                OnPropertyChanged(EventArgsCache.IsUsablePropertyChanged);
+            }
         }
 
         private bool _isDisposing;
@@ -45,7 +50,13 @@ namespace Minimal.Mvvm.Windows
         public bool IsDisposing
         {
             get => _isDisposing;
-            private set => SetProperty(ref _isDisposing, value, () => OnPropertyChanged(s_isUsablePropertyChanged));
+            private set
+            {
+                if (_isDisposing == value) return;
+                _isDisposing = value;
+                OnPropertyChanged(EventArgsCache.IsDisposingPropertyChanged);
+                OnPropertyChanged(EventArgsCache.IsUsablePropertyChanged);
+            }
         }
 
         /// <summary>
@@ -62,6 +73,18 @@ namespace Minimal.Mvvm.Windows
         /// Gets the contract for managing the asynchronous lifecycle of resources and actions.
         /// </summary>
         protected AsyncLifetime Lifetime { get; } = new(continueOnCapturedContext: true);
+
+        #endregion
+
+        #region Event Handlers
+
+        private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(IsInitialized))//handle only IsInitialized
+            {
+                OnPropertyChanged(EventArgsCache.IsUsablePropertyChanged);
+            }
+        }
 
         #endregion
 
@@ -136,16 +159,13 @@ namespace Minimal.Mvvm.Windows
             await DisposeAsync().ConfigureAwait(false);
         }
 
-        protected override bool SetProperty<T>(ref T storage, T value, string? propertyName, out T oldValue)
-        {
-            bool result = base.SetProperty(ref storage, value, propertyName, out oldValue);
-            if (result && propertyName == nameof(IsInitialized))
-            {
-                OnPropertyChanged(s_isUsablePropertyChanged);
-            }
-            return result;
-        }
-
         #endregion
+    }
+
+    internal static partial class EventArgsCache
+    {
+        internal static readonly PropertyChangedEventArgs IsDisposedPropertyChanged = new(nameof(ControlViewModel.IsDisposed));
+        internal static readonly PropertyChangedEventArgs IsDisposingPropertyChanged = new(nameof(ControlViewModel.IsDisposing));
+        internal static readonly PropertyChangedEventArgs IsUsablePropertyChanged = new(nameof(ControlViewModel.IsUsable));
     }
 }

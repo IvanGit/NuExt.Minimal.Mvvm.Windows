@@ -18,6 +18,10 @@
 - **`Minimal.Mvvm.Windows.ViewLocator`**: Locates and initializes views based on view models.
 - **`Minimal.Mvvm.Windows.WindowPlacementService`**: Saves and restores window placement between runs.
 
+### Recommended Companion Package
+
+For an enhanced development experience, we highly recommend using the [`NuExt.Minimal.Mvvm.SourceGenerator`](https://www.nuget.org/packages/NuExt.Minimal.Mvvm.SourceGenerator) package alongside this framework. It provides a source generator that produces boilerplate code for your ViewModels at compile time, significantly reducing the amount of repetitive coding tasks and allowing you to focus more on the application-specific logic.
+
 ### Installation
 
 You can install `NuExt.Minimal.Mvvm.Windows` via [NuGet](https://www.nuget.org/):

@@ -16,12 +16,8 @@ namespace WpfAppSample.ViewModels
     {
         #region Properties
 
+        [Notify(CallbackName = nameof(OnActiveDocumentChanged))]
         private IAsyncDocument? _activeDocument;
-        public IAsyncDocument? ActiveDocument
-        {
-            get => _activeDocument;
-            set => SetProperty(ref _activeDocument, value, OnActiveDocumentChanged);
-        }
 
         public ObservableCollection<MenuItemViewModel> MenuItems { get; } = new();
 

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
-using System.Windows;
+﻿using System.Diagnostics;
 
 namespace Minimal.Mvvm.Windows
 {
@@ -17,15 +15,11 @@ namespace Minimal.Mvvm.Windows
         /// </summary>
         public CancellationTokenSource CancellationTokenSource { get; } = new();
 
-        private string? _title;
         /// <summary>
         /// Gets or sets the title of the window.
         /// </summary>
-        public string? Title
-        {
-            get => _title;
-            set => SetProperty(ref _title, value);
-        }
+        [Notify]
+        private string? _title;
 
         #endregion
 

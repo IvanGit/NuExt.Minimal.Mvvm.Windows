@@ -1,4 +1,8 @@
-﻿namespace Minimal.Mvvm
+﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+
+namespace Minimal.Mvvm
 {
     /// <summary>
     /// Provides a base class for settings objects, extending the functionality of <see cref="ModelBase"/>.
@@ -39,7 +43,12 @@
         public bool IsDirty
         {
             get => _isDirty;
-            protected set => SetProperty(ref _isDirty, value);
+            protected set
+            {
+                if (_isDirty == value) return;
+                _isDirty = value;
+                OnPropertyChanged(EventArgsCache.IsDirtyPropertyChanged);
+            }
         }
 
         private bool _isSuspended;
@@ -49,7 +58,12 @@
         public bool IsSuspended
         {
             get => _isSuspended;
-            private set => SetProperty(ref _isSuspended, value);
+            private set
+            {
+                if (_isSuspended == value) return;
+                _isSuspended = value;
+                OnPropertyChanged(EventArgsCache.IsSuspendedPropertyChanged);
+            }
         }
 
         private volatile int _isDirtySuspended;
@@ -57,6 +71,15 @@
         /// Gets a value indicating whether the dirty state tracking is currently suspended.
         /// </summary>
         private bool IsDirtySuspended => _isDirtySuspended != 0;
+
+        #endregion
+
+        #region Event Handlers
+
+        private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            MakeDirty(e.PropertyName);
+        }
 
         #endregion
 
@@ -74,7 +97,17 @@
             return true;
         }
 
-        private void MakeDirty(string? propertyName)
+        protected override bool CanSetProperty<T>(T oldValue, T newValue, [CallerMemberName] string? propertyName = null)
+        {
+            Debug.Assert(propertyName != nameof(IsDirty) && propertyName != nameof(IsSuspended));
+            if (IsSuspended || !IsValidPropertyValue(propertyName, newValue))
+            {
+                return false;
+            }
+            return base.CanSetProperty(oldValue, newValue, propertyName);
+        }
+
+        protected void MakeDirty(string? propertyName)
         {
             if (!IsInitialized || IsDirtySuspended ||
                 propertyName is null or nameof(IsInitialized) or nameof(IsDirty) or nameof(IsSuspended))
@@ -82,6 +115,18 @@
                 return;
             }
             IsDirty = true;
+        }
+
+        protected override void OnInitialize()
+        {
+            base.OnInitialize();
+            PropertyChanged += OnPropertyChanged;
+        }
+
+        protected override void OnUninitialize()
+        {
+            PropertyChanged -= OnPropertyChanged;
+            base.OnUninitialize();
         }
 
         /// <summary>
@@ -98,18 +143,6 @@
         public void ResumeChanges()
         {
             IsSuspended = false;
-        }
-
-        protected override bool SetProperty<T>(ref T storage, T value, string? propertyName, out T oldValue)
-        {
-            if ((IsSuspended && propertyName is not nameof(IsSuspended)) || !IsValidPropertyValue(propertyName, value))
-            {
-                oldValue = default!;
-                return false;
-            }
-            if (!base.SetProperty(ref storage, value, propertyName, out oldValue)) return false;
-            MakeDirty(propertyName);
-            return true;
         }
 
         /// <summary>
@@ -130,5 +163,11 @@
         }
 
         #endregion
+    }
+
+    internal static partial class EventArgsCache
+    {
+        internal static readonly PropertyChangedEventArgs IsDirtyPropertyChanged = new(nameof(SettingsBase.IsDirty));
+        internal static readonly PropertyChangedEventArgs IsSuspendedPropertyChanged = new(nameof(SettingsBase.IsSuspended));
     }
 }

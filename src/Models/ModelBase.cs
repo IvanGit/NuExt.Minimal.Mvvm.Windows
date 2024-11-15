@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -26,7 +27,12 @@ namespace Minimal.Mvvm
         public bool IsInitialized
         {
             get => _isInitialized;
-            private set => SetProperty(ref _isInitialized, value);
+            private set
+            {
+                if (_isInitialized == value) return;
+                _isInitialized = value;
+                OnPropertyChanged(EventArgsCache.IsInitializedPropertyChanged);
+            }
         }
 
         #endregion
@@ -170,5 +176,10 @@ namespace Minimal.Mvvm
         }
 
         #endregion
+    }
+
+    internal static partial class EventArgsCache
+    {
+        internal static readonly PropertyChangedEventArgs IsInitializedPropertyChanged = new(nameof(ModelBase.IsInitialized));
     }
 }

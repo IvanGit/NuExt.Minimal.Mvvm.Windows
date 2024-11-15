@@ -125,7 +125,7 @@ namespace Minimal.Mvvm.Windows
                 viewModelBase.Parameter ??= parameter;
                 if (!viewModelBase.IsInitialized)
                 {
-                    await viewModelBase.InitializeAsync(cancellationToken);
+                    await viewModelBase.InitializeAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
         }
