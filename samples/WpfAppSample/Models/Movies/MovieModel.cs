@@ -20,10 +20,10 @@ namespace WpfAppSample.Models
         public override MovieKind Kind => MovieKind.Movie;
 
         [JsonPropertyOrder(2)]
-        public ObservableCollection<PersonModel> Directors { get; set; } = new();
+        public ObservableCollection<PersonModel> Directors { get; set; } = [];
 
         [JsonPropertyOrder(3)]
-        public ObservableCollection<PersonModel> Writers { get; set; } = new();
+        public ObservableCollection<PersonModel> Writers { get; set; } = [];
 
         [Notify, CustomAttribute("global::System.Text.Json.Serialization.JsonPropertyOrder(4)")]
         [CustomAttribute("global::System.Text.Json.Serialization.JsonConverter(typeof(WpfAppSample.Converters.JsonMovieReleaseDateConverter))")]

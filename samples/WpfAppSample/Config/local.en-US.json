@@ -1,0 +1,22 @@
+{
+  "Accent": "Accent",
+  "An error has occurred in Arg0:Arg1": "An error has occurred in {0}:\r\n{1}",
+  "Are you sure you want to delete 'Arg0'?": "Are you sure you want to delete '{0}'?",
+  "Close Active Document": "Close Active Document",
+  "Confirmation": "Confirmation",
+  "Edit Group Name": "Edit Group Name",
+  "Edit Movie": "Edit Movie",
+  "Enter new group name": "Enter new group name",
+  "Error": "Error",
+  "Exit": "Exit",
+  "File": "File",
+  "Hide Active Document": "Hide Active Document",
+  "Movies": "Movies",
+  "New Group Name": "New Group Name",
+  "New Movie": "New Movie",
+  "Show Active Document": "Show Active Document",
+  "Theme": "Theme",
+  "Untitled": "Untitled",
+  "View": "View",
+  "Yes": "Yes"
+}

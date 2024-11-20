@@ -233,7 +233,7 @@ namespace Minimal.Mvvm.Windows
         /// <returns>The registered asynchronous command.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="executeMethod"/> is null.</exception>
         /// <exception cref="ObjectDisposedException">Thrown if the ViewModel has been disposed.</exception>
-        public IAsyncCommand RegisterAsyncCommand<T>(Func<T?, Task> executeMethod, Func<T?, bool>? canExecuteMethod = null, bool continueOnCapturedContext = true)
+        public IAsyncCommand<T> RegisterAsyncCommand<T>(Func<T, Task> executeMethod, Func<T, bool>? canExecuteMethod = null, bool continueOnCapturedContext = true)
         {
             Throw.IfNull(executeMethod);
             CheckDisposed();
@@ -289,7 +289,7 @@ namespace Minimal.Mvvm.Windows
         /// <returns>The registered synchronous command.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="executeMethod"/> is null.</exception>
         /// <exception cref="ObjectDisposedException">Thrown if the ViewModel has been disposed.</exception>
-        public ICommand RegisterCommand<T>(Action<T?> executeMethod, Func<T?, bool>? canExecuteMethod = null)
+        public ICommand<T> RegisterCommand<T>(Action<T> executeMethod, Func<T, bool>? canExecuteMethod = null)
         {
             Throw.IfNull(executeMethod);
             CheckDisposed();

@@ -99,8 +99,8 @@
             </Grid>
 
             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
-                <Button Margin="2" Content="Expand All" Command="{Binding ExpandCollapseCommand}" CommandParameter="True"/>
-                <Button Margin="2" Content="Collapse All" Command="{Binding ExpandCollapseCommand}" CommandParameter="False"/>
+                <Button Margin="2" Content="Expand All" Command="{Binding ExpandOrCollapseCommand}" CommandParameter="True"/>
+                <Button Margin="2" Content="Collapse All" Command="{Binding ExpandOrCollapseCommand}" CommandParameter="False"/>
                 <TextBlock Margin="5,0" VerticalAlignment="Center" 
                            Text="You can move items by drag'n'drop between groups with mouse"/>
             </StackPanel>

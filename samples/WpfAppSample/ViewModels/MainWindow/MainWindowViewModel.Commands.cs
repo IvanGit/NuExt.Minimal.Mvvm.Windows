@@ -14,15 +14,6 @@ namespace WpfAppSample.ViewModels
         [Notify(Setter = Private)]
         private ICommand? _activeDocumentChangedCommand;
 
-        [Notify(Setter = Private)]
-        private ICommand? _closeActiveDocumentCommand;
-
-        [Notify(Setter = Private)]
-        private ICommand? _showHideActiveDocumentCommand;
-
-        [Notify(Setter = Private)]
-        private ICommand? _showMoviesCommand;
-
         #endregion
 
         #region Command Methods
@@ -32,6 +23,7 @@ namespace WpfAppSample.ViewModels
             return IsUsable && ActiveDocument != null;
         }
 
+        [Notify(Setter = Private)]
         private async Task CloseActiveDocumentAsync()
         {
             await ActiveDocument!.CloseAsync();
@@ -42,6 +34,7 @@ namespace WpfAppSample.ViewModels
             return IsUsable && ActiveDocument != null;
         }
 
+        [Notify(Setter = Private)]
         private void ShowHideActiveDocument(bool show)
         {
             if (show)
@@ -59,6 +52,7 @@ namespace WpfAppSample.ViewModels
             return IsUsable && DocumentManagerService != null;
         }
 
+        [Notify(Setter = Private)]
         private async Task ShowMoviesAsync()
         {
             var cancellationToken = GetCurrentCancellationToken();
@@ -66,7 +60,7 @@ namespace WpfAppSample.ViewModels
             var document = await DocumentManagerService!.FindDocumentByIdOrCreateAsync(default(Movies),
                 async x =>
                 {
-                    var vm = new MoviesViewModel() { Title = "Movies" };
+                    var vm = new MoviesViewModel() { Title = Loc.Movies };
                     try
                     {
                         var doc = await x.CreateDocumentAsync(nameof(MoviesView), vm, this, null, cancellationToken);

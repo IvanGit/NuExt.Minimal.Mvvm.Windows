@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(UseNuExtPackages)' == 'true'">
-    <PackageReference Include="NuExt.Minimal.Mvvm.SourceGenerator" Version="0.2.0" />
+    <PackageReference Include="NuExt.Minimal.Mvvm.SourceGenerator" Version="0.2.3" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(UseNuExtPackages)' == 'false'">
@@ -32,6 +32,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <AdditionalFiles Include="Config\*.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Config\local.en-US.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Config\nlog.config.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

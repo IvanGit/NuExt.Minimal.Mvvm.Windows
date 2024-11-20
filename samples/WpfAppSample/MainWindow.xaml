@@ -4,14 +4,15 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:minimal="http://schemas.minimalmvvm.com/winfx/xaml/mvvm"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfAppSample"
         xmlns:viewModels="clr-namespace:WpfAppSample.ViewModels"
-        xmlns:controlzex="urn:controlzex"
         xmlns:views="clr-namespace:WpfAppSample.Views"
+        xmlns:controlzex="urn:controlzex"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance {x:Type viewModels:MainWindowViewModel}, IsDesignTimeCreatable=True}"
         ResizeMode="CanResizeWithGrip"
         WindowStartupLocation="CenterScreen"
-        Title="{Binding Title, TargetNullValue='Untitled'}" Height="450" Width="800" MinHeight="450" MinWidth="800">
+        Title="{Binding Title, TargetNullValue={x:Static local:Loc.Untitled}}" Height="450" Width="800" MinHeight="450" MinWidth="800">
     <minimal:Interaction.Behaviors>
         <minimal:WindowService/>
         <minimal:InputDialogService/>

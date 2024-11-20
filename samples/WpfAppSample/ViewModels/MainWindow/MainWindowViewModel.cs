@@ -19,7 +19,7 @@ namespace WpfAppSample.ViewModels
         [Notify(CallbackName = nameof(OnActiveDocumentChanged))]
         private IAsyncDocument? _activeDocument;
 
-        public ObservableCollection<MenuItemViewModel> MenuItems { get; } = new();
+        public ObservableCollection<MenuItemViewModel> MenuItems { get; } = [];
 
         #endregion
 
@@ -63,22 +63,22 @@ namespace WpfAppSample.ViewModels
             {
                 new()
                 {
-                    Header = "File",
+                    Header = Loc.File,
                     SubMenuItems=new ObservableCollection<MenuItemViewModel?>(new MenuItemViewModel?[]
                     {
-                        new() { Header = "Movies", Command = ShowMoviesCommand },
+                        new() { Header = Loc.Movies, Command = ShowMoviesCommand },
                         null,
-                        new() { Header = "Exit", Command = CloseCommand }
+                        new() { Header = Loc.Exit, Command = CloseCommand }
                     })
                 },
                 new()
                 {
-                    Header = "View",
+                    Header = Loc.View,
                     SubMenuItems=new ObservableCollection<MenuItemViewModel?>(new MenuItemViewModel?[]
                     {
-                        new() { Header = "Hide Active Document", CommandParameter = false, Command = ShowHideActiveDocumentCommand },
-                        new() { Header = "Show Active Document", CommandParameter = true, Command = ShowHideActiveDocumentCommand },
-                        new() { Header = "Close Active Document", Command = CloseActiveDocumentCommand }
+                        new() { Header = Loc.Hide_Active_Document, CommandParameter = false, Command = ShowHideActiveDocumentCommand },
+                        new() { Header = Loc.Show_Active_Document, CommandParameter = true, Command = ShowHideActiveDocumentCommand },
+                        new() { Header = Loc.Close_Active_Document, Command = CloseActiveDocumentCommand }
                     })
                 }
             };
@@ -97,7 +97,7 @@ namespace WpfAppSample.ViewModels
         protected override void OnError(Exception ex, [CallerMemberName] string? callerName = null)
         {
             base.OnError(ex, callerName);
-            MessageBox.Show($"An error has occurred in {callerName}:{Environment.NewLine}{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(string.Format(Loc.An_error_has_occurred_in_Arg0_Arg1, callerName, ex.Message), Loc.Error, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         protected override async Task OnInitializeAsync(CancellationToken cancellationToken)
