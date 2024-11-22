@@ -12,7 +12,7 @@
     <PackageReference Include="ControlzEx" Version="6.0.0" />
     <PackageReference Include="MahApps.Metro.IconPacks.Material" Version="5.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="5.3.14" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.3.15" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(UseNuExtPackages)' == 'true'">
-    <PackageReference Include="NuExt.Minimal.Mvvm.SourceGenerator" Version="0.2.3" PrivateAssets="all" />
+    <PackageReference Include="NuExt.Minimal.Mvvm.SourceGenerator" Version="0.2.4" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(UseNuExtPackages)' == 'false'">

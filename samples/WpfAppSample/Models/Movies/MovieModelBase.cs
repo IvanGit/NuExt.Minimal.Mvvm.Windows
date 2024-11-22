@@ -18,7 +18,6 @@ namespace WpfAppSample.Models
 
         [Notify, CustomAttribute("global::System.Text.Json.Serialization.JsonIgnore")]
         private bool _isExpanded;
-        [JsonIgnore]
 
         [JsonPropertyOrder(0)]
         public abstract MovieKind Kind { get; }

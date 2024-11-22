@@ -8,7 +8,7 @@ namespace WpfAppSample.ViewModels
     {
         #region Properties
 
-        [Notify]
+        [Notify(Setter = AccessModifier.Private)]
         private MoviesSettings? _settings;
 
         #endregion

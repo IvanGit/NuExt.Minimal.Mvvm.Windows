@@ -51,7 +51,8 @@
         <StatusBar Grid.Row="2">
             <StatusBarItem>
                 <TextBlock>
-                    <Run Text="Documents Opened:"/>
+                    <Run Text="{x:Static local:Loc.Documents_Opened}"/>
+                    <Run Text=":"/>
                     <Run Text="{Binding Count, ElementName=Documents, Mode=OneWay}"/>
                 </TextBlock>
             </StatusBarItem>

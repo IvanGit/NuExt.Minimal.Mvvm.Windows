@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace Minimal.Mvvm
 {
@@ -35,6 +37,12 @@ namespace Minimal.Mvvm
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Stores additional data not mapped to other properties.
+        /// </summary>
+        [JsonExtensionData]
+        public Dictionary<string, JsonElement>? AdditionalData { get; set; }
 
         private bool _isDirty;
         /// <summary>
