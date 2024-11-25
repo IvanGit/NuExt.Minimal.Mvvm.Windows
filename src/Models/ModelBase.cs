@@ -59,12 +59,11 @@ namespace Minimal.Mvvm
             var dict = new Dictionary<string, PropertyInfo>();
             foreach (var prop in props)
             {
-                if (dict.ContainsKey(prop.Name))
+                if (dict.TryAdd(prop.Name, prop))
                 {
-                    Debug.Assert(prop.GetGetMethod()!.IsVirtual);
                     continue;
                 }
-                dict.Add(prop.Name, prop);
+                Debug.Assert(prop.GetGetMethod()!.IsVirtual);
             }
             return dict;
         }
@@ -82,8 +81,7 @@ namespace Minimal.Mvvm
 #else
             Throw.IfNullOrEmpty(propertyName);
 #endif
-
-            Debug.Assert(GetProperties().ContainsKey(propertyName), "propertyName is not defined");
+            Debug.Assert(GetProperties().ContainsKey(propertyName), $"propertyName '{propertyName}' is not defined");
             return GetProperties().TryGetValue(propertyName, out var pi) ? pi.PropertyType : null;
         }
 
@@ -141,13 +139,13 @@ namespace Minimal.Mvvm
             Throw.IfNullOrEmpty(propertyName);
 #endif
 
-            Debug.Assert(GetProperties().ContainsKey(propertyName), "propertyName is not defined");
-            if (GetProperties().TryGetValue(propertyName, out var pi) && pi.CanWrite)
+            Debug.Assert(GetProperties().ContainsKey(propertyName), $"propertyName '{propertyName}' is not defined");
+            if (!GetProperties().TryGetValue(propertyName, out var pi) || !pi.CanWrite)
             {
-                pi.SetValue(this, value);
-                return true;
+                return false;
             }
-            return false;
+            pi.SetValue(this, value);
+            return true;
         }
 
         /// <summary>

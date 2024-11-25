@@ -120,6 +120,8 @@ namespace WpfAppSample
 
             ConfigureLogging(environmentService);
 
+            environmentService.LoadLocalization(typeof(Loc), CultureInfo.CurrentUICulture.IetfLanguageTag);
+
             var logger = GetService<ILogger>();
             logger?.LogInformation("Application started.");
 
