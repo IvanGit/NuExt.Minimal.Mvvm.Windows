@@ -48,6 +48,7 @@ namespace Minimal.Mvvm
         /// <summary>
         /// Gets a value indicating whether the object has been modified since its creation or last reset.
         /// </summary>
+        [JsonIgnore]
         public bool IsDirty
         {
             get => _isDirty;
@@ -63,6 +64,7 @@ namespace Minimal.Mvvm
         /// <summary>
         /// Gets a value indicating whether property changes are currently suspended.
         /// </summary>
+        [JsonIgnore]
         public bool IsSuspended
         {
             get => _isSuspended;

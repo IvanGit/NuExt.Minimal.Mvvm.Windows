@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Minimal.Mvvm
 {
@@ -11,7 +11,6 @@ namespace Minimal.Mvvm
     /// It leverages reflection to manage properties and provides methods to get property types, initialize the object,
     /// and set property values dynamically.
     /// </summary>
-    [DataContract]
     public abstract class ModelBase : BindableBase
     {
         private static readonly ConcurrentDictionary<Type, IDictionary<string, PropertyInfo>> s_typeProperties = new();
@@ -24,6 +23,7 @@ namespace Minimal.Mvvm
         /// <summary>
         /// Gets a value indicating whether the object has been initialized.
         /// </summary>
+        [JsonIgnore]
         public bool IsInitialized
         {
             get => _isInitialized;

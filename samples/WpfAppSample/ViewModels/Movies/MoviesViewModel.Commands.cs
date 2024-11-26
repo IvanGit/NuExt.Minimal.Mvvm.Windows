@@ -55,10 +55,11 @@ namespace WpfAppSample.ViewModels
             switch (clone)
             {
                 case MovieGroupModel group:
-                    await using (var viewModel = new InputDialogViewModel() { InputMessage = Loc.Enter_new_group_name })
+                    await using (var viewModel = new InputDialogViewModel())
                     {
+                        viewModel.InputMessage = Loc.Enter_new_group_name;
                         var dlgResult = await DialogService!.ShowDialogAsync(MessageBoxButton.OKCancel,
-                            Loc.Edit_Group_Name, nameof(InputDialogView), viewModel, this, group.Name, cancellationToken);
+                            Loc.Edit_Group, nameof(InputDialogView), viewModel, this, group.Name, cancellationToken);
                         if (dlgResult != MessageBoxResult.OK || string.IsNullOrWhiteSpace(viewModel.InputText))
                         {
                             return;
@@ -102,16 +103,15 @@ namespace WpfAppSample.ViewModels
             var cancellationToken = GetCurrentCancellationToken();
 
             string? groupName = null;
-            await using (var viewModel = new InputDialogViewModel() { InputMessage = Loc.Enter_new_group_name })
+            await using var viewModel = new InputDialogViewModel();
+            viewModel.InputMessage = Loc.Enter_new_group_name;
+            var dlgResult = await DialogService!.ShowDialogAsync(MessageBoxButton.OKCancel, Loc.New_Group,
+               nameof(InputDialogView), viewModel, this, groupName, cancellationToken);
+            if (dlgResult != MessageBoxResult.OK)
             {
-                var dlgResult = await DialogService!.ShowDialogAsync(MessageBoxButton.OKCancel, Loc.New_Group_Name,
-                   nameof(InputDialogView), viewModel, this, groupName, cancellationToken);
-                if (dlgResult != MessageBoxResult.OK)
-                {
-                    return;
-                }
-                groupName = viewModel.InputText;
+                return;
             }
+            groupName = viewModel.InputText;
 
             if (string.IsNullOrWhiteSpace(groupName))
             {
