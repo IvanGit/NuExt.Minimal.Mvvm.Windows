@@ -130,8 +130,9 @@ namespace WpfAppSample
             var viewModel = new MainWindowViewModel() { ParentViewModel = this };
             try
             {
+                var window = new MainWindow { DataContext = viewModel };
                 await viewModel.InitializeAsync(viewModel.CancellationTokenSource.Token);
-                new MainWindow { DataContext = viewModel }.Show();
+                window.Show();
             }
             catch (Exception ex)
             {

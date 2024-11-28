@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,6 +17,12 @@ namespace Minimal.Mvvm.Windows.Controls
         /// <summary>Identifies the <see cref="CommandsSource"/> dependency property.</summary>
         public static readonly DependencyProperty CommandsSourceProperty = DependencyProperty.Register(
             nameof(CommandsSource), typeof(IEnumerable), typeof(InputDialog));
+
+        /// <summary>
+        /// Identifies the <see cref="ValidatesOnDataErrors"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty ValidatesOnDataErrorsProperty = DependencyProperty.Register(
+            nameof(ValidatesOnDataErrors), typeof(bool), typeof(InputDialog), new PropertyMetadata(false));
 
         #endregion
 
@@ -36,10 +43,24 @@ namespace Minimal.Mvvm.Windows.Controls
 
         #region Properties
 
+        /// <summary>
+        /// UI commands.
+        /// </summary>
         public IEnumerable? CommandsSource
         {
             get => (IEnumerable)GetValue(CommandsSourceProperty);
             set => SetValue(CommandsSourceProperty, value);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the dialog should check for validation errors
+        /// when closing. If true, the dialog will prevent closing if there are validation errors.
+        /// This applies only if the ViewModel implements the <see cref="IDataErrorInfo"/> interface.
+        /// </summary>
+        public bool ValidatesOnDataErrors
+        {
+            get => (bool)GetValue(ValidatesOnDataErrorsProperty);
+            set => SetValue(ValidatesOnDataErrorsProperty, value);
         }
 
         #endregion
@@ -50,8 +71,11 @@ namespace Minimal.Mvvm.Windows.Controls
         {
             if (e.OriginalSource is Button { DataContext: UICommand command })
             {
-                _tcs = command;
-                Close();
+                if (command != DefaultCommand || !HasValidationErrors())
+                {
+                    _tcs = command;
+                    DialogResult = command == DefaultCommand;
+                }
                 e.Handled = true;
             }
         }
@@ -74,8 +98,11 @@ namespace Minimal.Mvvm.Windows.Controls
 
                 if (result != null)
                 {
-                    _tcs = result;
-                    DialogResult = true;
+                    if (result != DefaultCommand || !HasValidationErrors())
+                    {
+                        _tcs = result;
+                        DialogResult = result == DefaultCommand;
+                    }
                 }
                 e.Handled = true;
             }
@@ -84,6 +111,20 @@ namespace Minimal.Mvvm.Windows.Controls
         #endregion
 
         #region Methods
+
+        private bool HasValidationErrors()
+        {
+            if (!ValidatesOnDataErrors)
+            {
+                return false;
+            }
+            var viewModel = ViewModelHelper.GetViewModelFromView(Content);
+            if (viewModel is not IDataErrorInfo errorInfo)
+            {
+                return false;
+            }
+            return !string.IsNullOrEmpty(errorInfo.Error);
+        }
 
         private Lifetime SubscribeMetroDialog(CancellationToken cancellationToken)
         {

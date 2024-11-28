@@ -15,7 +15,8 @@
         Title="{Binding Title, TargetNullValue={x:Static local:Loc.Untitled}}" Height="450" Width="800" MinHeight="450" MinWidth="800">
     <minimal:Interaction.Behaviors>
         <minimal:WindowService/>
-        <minimal:InputDialogService MessageBoxButtonLocalizer="{StaticResource MessageBoxButtonLocalizer}"/>
+        <minimal:InputDialogService MessageBoxButtonLocalizer="{StaticResource MessageBoxButtonLocalizer}"
+                                    ValidatesOnDataErrors="True"/>
         <minimal:EventTrigger EventName="Closing" Command="{Binding ClosingCommand}" PassEventArgsToCommand="True" />
         <minimal:EventTrigger EventName="ContentRendered" Command="{Binding ContentRenderedCommand}"/>
         <minimal:EventTrigger EventName="Loaded" Command="{Binding LoadedCommand}" />

@@ -1,4 +1,5 @@
 ﻿using Minimal.Mvvm.Windows.Controls;
+using System.ComponentModel;
 using System.Windows;
 
 namespace Minimal.Mvvm.Windows
@@ -9,6 +10,31 @@ namespace Minimal.Mvvm.Windows
     /// </summary>
     public class InputDialogService : DialogServiceBase, IAsyncDialogService
     {
+        #region Dependency Properties
+
+        /// <summary>
+        /// Identifies the <see cref="ValidatesOnDataErrors"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty ValidatesOnDataErrorsProperty = DependencyProperty.Register(
+            nameof(ValidatesOnDataErrors), typeof(bool), typeof(InputDialogService), new PropertyMetadata(false));
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the service should check for validation errors
+        /// when closing the dialog. If true, the service will prevent the dialog from closing if there are validation errors.
+        /// This applies only if the ViewModel implements the <see cref="IDataErrorInfo"/> interface.
+        /// </summary>
+        public bool ValidatesOnDataErrors
+        {
+            get => (bool)GetValue(ValidatesOnDataErrorsProperty);
+            set => SetValue(ValidatesOnDataErrorsProperty, value);
+        }
+
+        #endregion
+
         #region Methods
 
         /// <summary>
@@ -34,6 +60,7 @@ namespace Minimal.Mvvm.Windows
                 Content = view,
                 Owner = GetWindow(),
                 Title = title ?? (viewModel != null ? ViewModelHelper.GetViewModelTitle(viewModel) : null) ?? string.Empty,
+                ValidatesOnDataErrors = ValidatesOnDataErrors,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
             };
             return dialog.ShowDialog(cancellationToken);

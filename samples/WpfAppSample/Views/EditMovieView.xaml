@@ -43,7 +43,7 @@
         <Label Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Content="{x:Static local:Loc.Title}" />
         <TextBox Grid.Column="1" Grid.Row="0" Margin="5"
                  x:Name="MovieNameTextBox" 
-                 Text="{Binding Movie.Name, UpdateSourceTrigger=PropertyChanged}"
+                 Text="{Binding Movie.Name, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                  TextWrapping="Wrap">
             <minimal:Interaction.Behaviors>
                 <minimal:FocusBehavior />
@@ -52,7 +52,7 @@
 
         <Label Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" Content="{x:Static local:Loc.Release_Date}" />
         <DatePicker Grid.Column="1" Grid.Row="1" Margin="5"
-                    SelectedDate="{Binding Movie.ReleaseDate}" />
+                    SelectedDate="{Binding Movie.ReleaseDate, ValidatesOnDataErrors=True}" />
 
         <Label Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" Content="{x:Static local:Loc.Directors}" />
         <ComboBox Grid.Column="1" Grid.Row="2" Margin="5"

@@ -68,19 +68,17 @@ namespace Minimal.Mvvm.Windows
             try
             {
                 await DisposeAsync();
+
+                Debug.Assert(CheckAccess());
+                Debug.Assert(WindowService != null, $"{nameof(WindowService)} is null");
+                WindowService?.Close();
+                CancellationTokenSource.Dispose();
             }
             catch (Exception ex)
             {
                 //TODO logging
                 OnError(ex);
             }
-
-            //await Task.Delay(1000);
-
-            Debug.Assert(CheckAccess());
-            Debug.Assert(WindowService != null, $"{nameof(WindowService)} is null");
-            WindowService?.Close();
-            CancellationTokenSource.Dispose();
         }
 
         #endregion
