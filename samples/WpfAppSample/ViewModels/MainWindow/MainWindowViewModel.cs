@@ -47,14 +47,6 @@ namespace WpfAppSample.ViewModels
 
         #region Methods
 
-        public async ValueTask CloseMovieAsync(MovieModel movie, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            var doc = DocumentManagerService!.FindDocumentById(new MovieDocument(movie));
-            if (doc == null) return;
-            await doc.CloseAsync();
-        }
-
         private ValueTask LoadMenuAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -113,28 +105,6 @@ namespace WpfAppSample.ViewModels
             }
 
             return base.OnInitializeAsync(cancellationToken);
-        }
-
-        public async ValueTask OpenMovieAsync(MovieModel movie, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            var document = await DocumentManagerService!.FindDocumentByIdOrCreateAsync(new MovieDocument(movie), async x =>
-            {
-                var vm = new MovieViewModel();
-                try
-                {
-                    var doc = await x.CreateDocumentAsync(nameof(MovieView), vm, this, movie, cancellationToken);
-                    doc.DisposeOnClose = true;
-                    return doc;
-                }
-                catch (Exception ex)
-                {
-                    Debug.Assert(ex is OperationCanceledException, ex.Message);
-                    await vm.DisposeAsync();
-                    throw;
-                }
-            });
-            document.Show();
         }
 
         private void UpdateTitle()

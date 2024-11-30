@@ -10,7 +10,7 @@ namespace Minimal.Mvvm.Windows
     /// </summary>
     public sealed class OpenWindowsService : ServiceBase<FrameworkElement>, IOpenWindowsService
     {
-        private readonly List<WindowViewModel> _viewModels = new();
+        private readonly List<WindowViewModel> _viewModels = [];
         private readonly AsyncLock _lock = new();
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace Minimal.Mvvm.Windows
                     }
                     catch (Exception ex)
                     {
-                        exceptions ??= new List<Exception>();
+                        exceptions ??= [];
                         exceptions.Add(ex);
                     }
                 }

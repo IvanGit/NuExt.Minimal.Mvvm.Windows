@@ -2,6 +2,7 @@
 using Minimal.Mvvm.Windows;
 using System.Diagnostics;
 using System.Windows.Input;
+using WpfAppSample.Models;
 using WpfAppSample.Views;
 using static AccessModifier;
 
@@ -77,6 +78,45 @@ namespace WpfAppSample.ViewModels
             document.Show();
         }
 
+        private bool CanOpenMovie(MovieModel movie)
+        {
+            return IsUsable && DocumentManagerService != null;
+        }
+
+        [Notify(Setter = Private)]
+        private async Task OpenMovieAsync(MovieModel movie)
+        {
+            var cancellationToken = GetCurrentCancellationToken();
+
+            var document = await DocumentManagerService!.FindDocumentByIdOrCreateAsync(new MovieDocument(movie), async x =>
+            {
+                var vm = new MovieViewModel();
+                try
+                {
+                    var doc = await x.CreateDocumentAsync(nameof(MovieView), vm, this, movie, cancellationToken);
+                    doc.DisposeOnClose = true;
+                    return doc;
+                }
+                catch (Exception ex)
+                {
+                    Debug.Assert(ex is OperationCanceledException, ex.Message);
+                    await vm.DisposeAsync();
+                    throw;
+                }
+            });
+            document.Show();
+        }
+
+        private bool CanCloseMovie(MovieModel movie) => CanOpenMovie(movie);
+
+        [Notify(Setter = Private)]
+        private async Task CloseMovieAsync(MovieModel movie)
+        {
+            var doc = DocumentManagerService!.FindDocumentById(new MovieDocument(movie));
+            if (doc == null) return;
+            await doc.CloseAsync().ConfigureAwait(false);
+        }
+
         #endregion
 
         #region Methods
@@ -88,6 +128,8 @@ namespace WpfAppSample.ViewModels
             ShowMoviesCommand = RegisterAsyncCommand(ShowMoviesAsync, CanShowMovies);
             ShowHideActiveDocumentCommand = RegisterCommand<bool>(ShowHideActiveDocument, CanShowHideActiveDocument);
             CloseActiveDocumentCommand = RegisterAsyncCommand(CloseActiveDocumentAsync, CanCloseActiveDocument);
+            OpenMovieCommand = RegisterAsyncCommand<MovieModel>(OpenMovieAsync, CanOpenMovie);
+            CloseMovieCommand = RegisterAsyncCommand<MovieModel>(CloseMovieAsync, CanCloseMovie);
         }
 
         protected override async ValueTask OnContentRenderedAsync(CancellationToken cancellationToken)
