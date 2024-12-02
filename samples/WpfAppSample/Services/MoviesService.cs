@@ -29,7 +29,7 @@ namespace WpfAppSample.Services
 
         #region Properties
 
-        public List<PersonModel> Persons { get; } = new();
+        public List<PersonModel> Persons { get; } = [];
 
         private List<MovieModelBase>? PlainMovieList { get; set; }
 

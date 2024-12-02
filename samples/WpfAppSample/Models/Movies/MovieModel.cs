@@ -34,7 +34,6 @@ namespace WpfAppSample.Models
         [Notify, CustomAttribute("global::System.Text.Json.Serialization.JsonPropertyOrder(5)")]
         private string _description = null!;
 
-
         [Notify, CustomAttribute("global::System.Text.Json.Serialization.JsonPropertyOrder(6)")]
         private string _storyline = null!;
 

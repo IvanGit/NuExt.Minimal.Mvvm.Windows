@@ -82,7 +82,7 @@ namespace WpfAppSample.ViewModels
 
             await base.OnInitializeAsync(cancellationToken);
 
-            Movies = new ObservableCollection<MovieModelBase>();
+            Movies = [];
             Lifetime.Add(Movies.Clear);
 
             MoviesView = new ListCollectionView(Movies);
