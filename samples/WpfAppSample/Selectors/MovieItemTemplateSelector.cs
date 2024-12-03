@@ -1,9 +1,9 @@
-﻿using System.Diagnostics;
+﻿using MovieWpfApp.Models;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using WpfAppSample.Models;
 
-namespace WpfAppSample.Selectors
+namespace MovieWpfApp.Selectors
 {
     public sealed class MovieItemTemplateSelector : DataTemplateSelector
     {

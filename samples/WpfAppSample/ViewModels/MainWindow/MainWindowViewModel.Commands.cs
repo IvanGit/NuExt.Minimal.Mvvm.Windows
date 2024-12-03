@@ -1,12 +1,12 @@
 ﻿using Minimal.Mvvm;
 using Minimal.Mvvm.Windows;
+using MovieWpfApp.Models;
+using MovieWpfApp.Views;
 using System.Diagnostics;
 using System.Windows.Input;
-using WpfAppSample.Models;
-using WpfAppSample.Views;
 using static AccessModifier;
 
-namespace WpfAppSample.ViewModels
+namespace MovieWpfApp.ViewModels
 {
     partial class MainWindowViewModel
     {

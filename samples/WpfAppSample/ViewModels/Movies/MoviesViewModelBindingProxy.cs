@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace WpfAppSample.ViewModels
+namespace MovieWpfApp.ViewModels
 {
     internal sealed class MoviesViewModelBindingProxy : BindingProxy<MoviesViewModel>
     {

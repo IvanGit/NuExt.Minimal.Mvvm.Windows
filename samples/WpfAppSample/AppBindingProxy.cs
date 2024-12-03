@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace WpfAppSample
+namespace MovieWpfApp
 {
     public sealed class AppBindingProxy : BindingProxy<App>
     {

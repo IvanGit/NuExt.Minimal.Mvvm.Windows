@@ -1,10 +1,10 @@
 ﻿using Minimal.Mvvm.Windows;
+using MovieWpfApp.Models;
+using MovieWpfApp.Services;
 using System.ComponentModel;
 using System.Diagnostics;
-using WpfAppSample.Models;
-using WpfAppSample.Services;
 
-namespace WpfAppSample.ViewModels
+namespace MovieWpfApp.ViewModels
 {
     internal sealed class EditMovieViewModel : ControlViewModel, IDataErrorInfo
     {

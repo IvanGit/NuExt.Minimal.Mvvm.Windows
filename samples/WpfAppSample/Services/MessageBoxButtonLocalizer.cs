@@ -1,7 +1,7 @@
 ﻿using Minimal.Mvvm.Windows;
 using System.Windows;
 
-namespace WpfAppSample.Services
+namespace MovieWpfApp.Services
 {
     public sealed class MessageBoxButtonLocalizer : MessageBoxButtonLocalizerBase
     {

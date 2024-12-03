@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Logging;
 using Minimal.Mvvm;
 using Minimal.Mvvm.Windows;
+using MovieWpfApp.Services;
+using MovieWpfApp.ViewModels;
 using NLog;
 using NLog.Extensions.Logging;
 using System.Diagnostics;
@@ -9,12 +11,10 @@ using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
-using WpfAppSample.Services;
-using WpfAppSample.ViewModels;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
-namespace WpfAppSample
+namespace MovieWpfApp
 {
     /// <summary>
     /// Interaction logic for App.xaml
@@ -54,6 +54,7 @@ namespace WpfAppSample
         #region Services
 
         public EnvironmentService? EnvironmentService => GetService<EnvironmentService>();
+
         private OpenWindowsService? OpenWindowsService => GetService<OpenWindowsService>();
 
         #endregion

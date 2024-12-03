@@ -1,15 +1,15 @@
 ﻿using Minimal.Mvvm;
 using Minimal.Mvvm.Windows;
+using MovieWpfApp.Models;
+using MovieWpfApp.Services;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Data;
-using WpfAppSample.Models;
-using WpfAppSample.Services;
 using static AccessModifier;
 
-namespace WpfAppSample.ViewModels
+namespace MovieWpfApp.ViewModels
 {
     internal sealed partial class MoviesViewModel : DocumentContentViewModelBase
     {

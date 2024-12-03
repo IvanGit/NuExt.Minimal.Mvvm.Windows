@@ -1,7 +1,7 @@
 ﻿using Minimal.Mvvm;
 using Minimal.Mvvm.Windows;
 
-namespace WpfAppSample.ViewModels
+namespace MovieWpfApp.ViewModels
 {
     internal partial class InputDialogViewModel : ControlViewModel
     {

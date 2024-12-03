@@ -1,12 +1,12 @@
-﻿using System.Collections.ObjectModel;
+﻿using MovieWpfApp.Converters;
+using MovieWpfApp.Models;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using WpfAppSample.Converters;
-using WpfAppSample.Models;
 
-namespace WpfAppSample.Services
+namespace MovieWpfApp.Services
 {
     internal sealed class MoviesService
     {

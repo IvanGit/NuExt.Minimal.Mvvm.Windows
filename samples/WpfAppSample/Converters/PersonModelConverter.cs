@@ -1,8 +1,8 @@
-﻿using System.Text.Json;
+﻿using MovieWpfApp.Models;
+using System.Text.Json;
 using System.Text.Json.Serialization;
-using WpfAppSample.Models;
 
-namespace WpfAppSample.Converters
+namespace MovieWpfApp.Converters
 {
     internal sealed class PersonModelConverter : JsonConverter<PersonModel>
     {

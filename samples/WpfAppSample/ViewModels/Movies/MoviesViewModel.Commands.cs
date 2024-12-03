@@ -1,10 +1,10 @@
 ﻿using Minimal.Mvvm;
+using MovieWpfApp.Models;
+using MovieWpfApp.Views;
 using System.Windows;
-using WpfAppSample.Models;
-using WpfAppSample.Views;
 using static AccessModifier;
 
-namespace WpfAppSample.ViewModels
+namespace MovieWpfApp.ViewModels
 {
     partial class MoviesViewModel
     {
@@ -180,17 +180,17 @@ namespace WpfAppSample.ViewModels
             await ParentViewModel!.OpenMovieCommand!.ExecuteAsync((item as MovieModel)!, cancellationToken);
         }
 
-        private bool CanMove(MovieModelBase? draggedObject)
+        private bool CanMove(MovieModelBase draggedObject)
         {
-            return IsUsable && draggedObject?.CanDrag == true;
+            return IsUsable && draggedObject.CanDrag == true;
         }
 
         [Notify(Setter = Private)]
-        private async Task MoveAsync(MovieModelBase? draggedObject)
+        private async Task MoveAsync(MovieModelBase draggedObject)
         {
             var cancellationToken = GetCurrentCancellationToken();
 
-            var path = draggedObject!.GetPath();
+            var path = draggedObject.GetPath();
             await ReloadMoviesAsync(cancellationToken);
             var item = Movies!.FindByPath(path);
             //item?.Expand();
@@ -221,7 +221,7 @@ namespace WpfAppSample.ViewModels
             EditCommand = RegisterAsyncCommand(EditAsync, CanEdit);
             NewGroupCommand = RegisterAsyncCommand(NewGroupAsync, CanNewGroup);
             NewMovieCommand = RegisterAsyncCommand(NewMovieAsync, CanNewMovie);
-            MoveCommand = RegisterAsyncCommand<MovieModelBase?>(MoveAsync, CanMove);
+            MoveCommand = RegisterAsyncCommand<MovieModelBase>(MoveAsync, CanMove);
             OpenMovieCommand = RegisterAsyncCommand<MovieModelBase?>(OpenMovieAsync, CanOpenMovie);
             ExpandOrCollapseCommand = RegisterCommand<bool>(ExpandOrCollapse, _ => IsUsable);
         }

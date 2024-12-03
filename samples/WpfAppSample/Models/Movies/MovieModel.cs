@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace WpfAppSample.Models
+namespace MovieWpfApp.Models
 {
     public sealed partial class MovieModel : MovieModelBase, IDataErrorInfo
     {
@@ -13,7 +13,8 @@ namespace WpfAppSample.Models
         [JsonIgnore]
         public override bool CanDrag => true;
 
-        [JsonIgnore] public PersonModel? Director => Directors.FirstOrDefault();
+        [JsonIgnore]
+        public PersonModel? Director => Directors.FirstOrDefault();
 
         [JsonIgnore]
         public override bool IsEditable => true;
@@ -28,7 +29,7 @@ namespace WpfAppSample.Models
         public ObservableCollection<PersonModel> Writers { get; set; } = [];
 
         [Notify, CustomAttribute("global::System.Text.Json.Serialization.JsonPropertyOrder(4)")]
-        [CustomAttribute("global::System.Text.Json.Serialization.JsonConverter(typeof(WpfAppSample.Converters.JsonMovieReleaseDateConverter))")]
+        [CustomAttribute("global::System.Text.Json.Serialization.JsonConverter(typeof(MovieWpfApp.Converters.JsonMovieReleaseDateConverter))")]
         private DateTime _releaseDate;
 
         [Notify, CustomAttribute("global::System.Text.Json.Serialization.JsonPropertyOrder(5)")]

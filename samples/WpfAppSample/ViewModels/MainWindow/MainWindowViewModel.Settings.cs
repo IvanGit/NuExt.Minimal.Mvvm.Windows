@@ -1,8 +1,8 @@
 ﻿using Minimal.Mvvm;
+using MovieWpfApp.Models;
 using System.Diagnostics;
-using WpfAppSample.Models;
 
-namespace WpfAppSample.ViewModels
+namespace MovieWpfApp.ViewModels
 {
     internal partial class MainWindowViewModel
     {
