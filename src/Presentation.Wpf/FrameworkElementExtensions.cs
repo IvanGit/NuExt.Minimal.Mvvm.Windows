@@ -21,7 +21,7 @@
         /// </remarks>
         public static async Task WaitLoadedAsync(this FrameworkElement element, CancellationToken cancellationToken)
         {
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(element);
 #else
             Throw.IfNull(element);

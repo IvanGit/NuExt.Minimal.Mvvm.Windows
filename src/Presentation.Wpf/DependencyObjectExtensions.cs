@@ -12,7 +12,7 @@ namespace System.Windows
         /// <returns></returns>
         public static T? FindChild<T>(this DependencyObject parent) where T : DependencyObject
         {
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(parent);
 #else
             Throw.IfNull(parent);
@@ -46,7 +46,7 @@ namespace System.Windows
         /// <exception cref="ArgumentNullException">Thrown when the parent or name parameter is null.</exception>
         public static FrameworkElement? FindChildByName(this DependencyObject parent, string name)
         {
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(parent);
 #else
             Throw.IfNull(parent);
@@ -82,7 +82,7 @@ namespace System.Windows
         /// <exception cref="ArgumentNullException">Thrown when the parent parameter is null.</exception>
         public static IEnumerable<T> FindChildren<T>(this DependencyObject parent) where T : DependencyObject
         {
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(parent);
 #else
             Throw.IfNull(parent);
@@ -110,7 +110,7 @@ namespace System.Windows
         /// <exception cref="ArgumentNullException">Thrown when the source parameter is null.</exception>
         public static T? FindParent<T>(this DependencyObject source) where T : DependencyObject
         {
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(source);
 #else
             Throw.IfNull(source);

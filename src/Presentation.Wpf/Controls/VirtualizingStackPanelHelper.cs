@@ -18,7 +18,7 @@ namespace System.Windows.Controls
         /// </summary>
         public static void BringIntoView(this VirtualizingStackPanel virtualizingPanel, int index)
         {
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(virtualizingPanel);
 #else
             Throw.IfNull(virtualizingPanel);

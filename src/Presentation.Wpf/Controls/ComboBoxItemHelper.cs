@@ -71,6 +71,10 @@ namespace System.Windows.Controls
                     subContainer =
                         (ComboBoxItem?)container.ItemContainerGenerator.
                             ContainerFromIndex(i);
+
+                    // Bring the item into view to maintain the
+                    // same behavior as with a virtualizing panel.
+                    subContainer?.BringIntoView();
                 }
 
                 if (subContainer != null)
@@ -155,6 +159,10 @@ namespace System.Windows.Controls
                     subContainer =
                         (ComboBoxItem?)container.ItemContainerGenerator.
                             ContainerFromIndex(i);
+
+                    // Bring the item into view to maintain the
+                    // same behavior as with a virtualizing panel.
+                    subContainer?.BringIntoView();
                 }
 
                 if (subContainer != null)

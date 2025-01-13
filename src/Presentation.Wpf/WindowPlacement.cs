@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Drawing;
 using System.Runtime.InteropServices;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;
@@ -34,7 +33,7 @@ namespace System.Windows
         /// <summary>
         /// Gets or sets the normal (restored) position and size of the window.
         /// </summary>
-        public Rectangle NormalPosition { get; set; }
+        public System.Drawing.Rectangle NormalPosition { get; set; }
 
         /// <summary>
         /// Gets or sets the show command which determines how the window is to be shown.

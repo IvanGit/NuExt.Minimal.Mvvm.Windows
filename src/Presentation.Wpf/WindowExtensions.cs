@@ -12,7 +12,6 @@ namespace System.Windows
     {
         internal static readonly JsonSerializerOptions SerializerOptions = new()
         {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
             IgnoreReadOnlyProperties = true,
             WriteIndented = true,
             Converters = 
@@ -28,7 +27,7 @@ namespace System.Windows
         /// <exception cref="ArgumentNullException">Thrown when the window is null.</exception>
         public static void BringToFront(this Window window)
         {
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(window);
 #else
             Throw.IfNull(window);
@@ -55,12 +54,18 @@ namespace System.Windows
         /// or <c>null</c> if the operation fails.</returns>
         public static WindowPlacement? GetPlacement(this Window window)
         {
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(window);
 #else
             Throw.IfNull(window);
 #endif
-            return WindowPlacement.GetPlacement(new WindowInteropHelper(window).Handle);
+            var windowPlacement = WindowPlacement.GetPlacement(new WindowInteropHelper(window).Handle);
+            if (windowPlacement != null)
+            {
+                windowPlacement.WindowStyle = window.WindowStyle;
+                windowPlacement.ResizeMode = window.ResizeMode;
+            }
+            return windowPlacement;
         }
 
         /// <summary>
@@ -75,8 +80,6 @@ namespace System.Windows
             {
                 return null;
             }
-            windowPlacement.WindowStyle = window.WindowStyle;
-            windowPlacement.ResizeMode = window.ResizeMode;
             var output = JsonSerializer.Serialize(windowPlacement, SerializerOptions);
             return output;
         }
@@ -89,7 +92,7 @@ namespace System.Windows
         /// <returns><c>true</c> if the operation is successful, otherwise <c>false</c>.</returns>
         public static bool SetPlacement(this Window window, WindowPlacement? windowPlacement)
         {
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(window);
 #else
             Throw.IfNull(window);
