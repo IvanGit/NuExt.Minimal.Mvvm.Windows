@@ -32,7 +32,7 @@ namespace Minimal.Mvvm.Windows
         /// <returns>
         /// The <see cref="DataTemplate"/> to apply, or null if no template is required.
         /// </returns>
-        public override DataTemplate? SelectTemplate(object item, DependencyObject container)
+        public override DataTemplate? SelectTemplate(object? item, DependencyObject container)
         {
             return item is UICommand { IsDefault: true } ? DefaultButtonTemplate ?? ButtonTemplate : ButtonTemplate;
         }

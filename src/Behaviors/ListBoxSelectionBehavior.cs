@@ -71,6 +71,7 @@ namespace Minimal.Mvvm.Windows
 
         #region Methods
 
+        /// <inheritdoc />
         protected override void OnAttached()
         {
             base.OnAttached();
@@ -78,6 +79,7 @@ namespace Minimal.Mvvm.Windows
             ((INotifyCollectionChanged)AssociatedObject.Items).CollectionChanged += OnListBoxItemsCollectionChanged;
         }
 
+        /// <inheritdoc />
         protected override void OnDetaching()
         {
             if (AssociatedObject is not null)

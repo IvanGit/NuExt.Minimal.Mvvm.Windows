@@ -154,6 +154,7 @@ namespace Minimal.Mvvm.Windows
             Trace.WriteLine($"An error has occurred in {callerName}:{Environment.NewLine}{ex.Message}");
         }
 
+        /// <inheritdoc />
         protected override async Task OnUninitializeAsync(CancellationToken cancellationToken)
         {
             await DisposeAsync().ConfigureAwait(false);

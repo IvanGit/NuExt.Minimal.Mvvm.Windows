@@ -169,7 +169,7 @@ namespace Minimal.Mvvm.Windows
 
         #endregion
 
-        private readonly ObservableCollection<IAsyncDocument> _documents = new();
+        private readonly ObservableCollection<IAsyncDocument> _documents = [];
         private bool _isActiveDocumentChanging;
         private IDisposable? _subscription;
 
@@ -378,6 +378,7 @@ namespace Minimal.Mvvm.Windows
             return UnresolvedViewType == null ? null : Activator.CreateInstance(UnresolvedViewType);
         }
 
+        /// <inheritdoc />
         protected override void OnAttached()
         {
             base.OnAttached();
@@ -393,6 +394,7 @@ namespace Minimal.Mvvm.Windows
             }
         }
 
+        /// <inheritdoc />
         protected override void OnDetaching()
         {
             AssociatedObject!.Loaded -= OnTabControlLoaded;

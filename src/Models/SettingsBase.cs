@@ -52,7 +52,7 @@ namespace Minimal.Mvvm
         public bool IsDirty
         {
             get => _isDirty;
-            protected set
+            private set
             {
                 if (_isDirty == value) return;
                 _isDirty = value;
@@ -107,6 +107,7 @@ namespace Minimal.Mvvm
             return true;
         }
 
+        /// <inheritdoc />
         protected override bool CanSetProperty<T>(T oldValue, T newValue, [CallerMemberName] string? propertyName = null)
         {
             Debug.Assert(propertyName != nameof(IsDirty) && propertyName != nameof(IsSuspended));
@@ -117,6 +118,10 @@ namespace Minimal.Mvvm
             return base.CanSetProperty(oldValue, newValue, propertyName);
         }
 
+        /// <summary>
+        /// Marks the object as dirty based on the provided property name.
+        /// </summary>
+        /// <param name="propertyName">The name of the property that has been changed.</param>
         protected void MakeDirty(string? propertyName)
         {
             if (!IsInitialized || IsDirtySuspended ||
@@ -127,12 +132,14 @@ namespace Minimal.Mvvm
             IsDirty = true;
         }
 
+        /// <inheritdoc />
         protected override void OnInitialize()
         {
             base.OnInitialize();
             PropertyChanged += OnPropertyChanged;
         }
 
+        /// <inheritdoc />
         protected override void OnUninitialize()
         {
             PropertyChanged -= OnPropertyChanged;

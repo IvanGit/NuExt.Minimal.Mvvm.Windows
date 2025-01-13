@@ -91,6 +91,7 @@ namespace Minimal.Mvvm.Windows
 
         #region Event Handlers
 
+        /// <inheritdoc />
         protected override void OnWindowChanged(Window? oldWindow)
         {
             base.OnWindowChanged(oldWindow);
@@ -173,6 +174,7 @@ namespace Minimal.Mvvm.Windows
 
         #region Methods
 
+        /// <inheritdoc />
         protected override void OnAttached()
         {
             base.OnAttached();

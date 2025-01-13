@@ -50,6 +50,7 @@ namespace Minimal.Mvvm.Windows
 
         #region Methods
 
+        /// <inheritdoc />
         protected override void OnAttached()
         {
             base.OnAttached();
@@ -100,7 +101,7 @@ namespace Minimal.Mvvm.Windows
         public bool LoadSettings(SettingsBase settings, string name = "Settings", JsonSerializerOptions? options = null)
         {
             Debug.Assert(settings != null, "settings is null");
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(settings);
 #else
             Throw.IfNull(settings);
@@ -156,7 +157,7 @@ namespace Minimal.Mvvm.Windows
         public bool SaveSettings(SettingsBase settings, string name = "Settings", JsonSerializerOptions? options = null)
         {
             Debug.Assert(settings != null, "settings is null");
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(settings);
 #else
             Throw.IfNull(settings);

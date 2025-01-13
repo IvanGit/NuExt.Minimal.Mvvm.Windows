@@ -8,6 +8,7 @@ namespace Minimal.Mvvm.Windows
     /// </summary>
     public class FocusBehavior : EventTriggerBase<Control>
     {
+        /// <inheritdoc />
         protected override void OnEvent(object? sender, object? eventArgs)
         {
             Debug.Assert(sender is Control);

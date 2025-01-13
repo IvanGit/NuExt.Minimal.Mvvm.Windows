@@ -141,6 +141,7 @@ namespace Minimal.Mvvm.Windows
 
         #region Methods
 
+        /// <inheritdoc />
         protected override void CreateCommands()
         {
             base.CreateCommands();

@@ -127,6 +127,7 @@ namespace Minimal.Mvvm.Windows
             return treeViewItem?.DataContext as IDragDrop;
         }
 
+        /// <inheritdoc />
         protected override void OnAttached()
         {
             base.OnAttached();
@@ -142,6 +143,7 @@ namespace Minimal.Mvvm.Windows
             }
         }
 
+        /// <inheritdoc />
         protected override void OnDetaching()
         {
             AssociatedObject!.Loaded -= OnTreeViewLoaded;
@@ -150,7 +152,7 @@ namespace Minimal.Mvvm.Windows
             base.OnDetaching();
         }
 
-        private IDisposable? SubscribeTreeView(TreeView? treeView)
+        private Lifetime? SubscribeTreeView(TreeView? treeView)
         {
             Debug.Assert(treeView != null);
             if (treeView == null)

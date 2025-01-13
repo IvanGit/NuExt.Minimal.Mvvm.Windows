@@ -82,7 +82,7 @@ namespace Minimal.Mvvm.Windows
         protected virtual object? CreateViewFromType(Type viewType, string? viewName)
         {
             Throw.IfNull(viewType);
-            var ctor = viewType.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, Array.Empty<Type>(), null);
+            var ctor = viewType.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, [], null);
             if (ctor != null)
             {
                 return ctor.Invoke(null);

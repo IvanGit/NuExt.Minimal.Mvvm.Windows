@@ -79,12 +79,14 @@ namespace Minimal.Mvvm.Windows
 
         #region Methods
 
+        /// <inheritdoc />
         protected override void OnAttached()
         {
             base.OnAttached();
             AssociatedObject!.SelectedItemChanged += OnTreeViewSelectedItemChanged;
         }
 
+        /// <inheritdoc />
         protected override void OnDetaching()
         {
             if (AssociatedObject != null)
