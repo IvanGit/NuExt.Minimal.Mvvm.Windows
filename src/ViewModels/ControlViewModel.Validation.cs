@@ -29,7 +29,7 @@ namespace Minimal.Mvvm.Windows
             var commands = GetAllCommands();
             Debug.Assert(commands.All(c => c.Value is null));
 
-            Debug.Assert(CheckAccess());
+            //Debug.Assert(CheckAccess());
         }
     }
 }

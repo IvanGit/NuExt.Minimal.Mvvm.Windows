@@ -10,12 +10,14 @@
 - **`Minimal.Mvvm.Windows.WindowViewModel`**: Base class for window-specific ViewModels.
 - **`Minimal.Mvvm.Windows.IAsyncDialogService`**: Displays dialog windows asynchronously.
 - **`Minimal.Mvvm.Windows.IAsyncDocument`**: Asynchronous document created with `IAsyncDocumentManagerService`.
+- **`Minimal.Mvvm.Windows.IAsyncDocumentContent`**: Asynchronous document content that can represent a view model.
 - **`Minimal.Mvvm.Windows.IAsyncDocumentManagerService`**: Manages asynchronous documents.
 - **`Minimal.Mvvm.Windows.InputDialogService`**: Shows modal dialogs asynchronously.
 - **`Minimal.Mvvm.Windows.OpenWindowsService`**: Manages open window ViewModels within the application.
 - **`Minimal.Mvvm.Windows.SettingsService`**: Facilitates saving and loading settings.
 - **`Minimal.Mvvm.Windows.TabbedDocumentService`**: Manages tabbed documents within a UI.
 - **`Minimal.Mvvm.Windows.ViewLocator`**: Locates and initializes views based on view models.
+- **`Minimal.Mvvm.Windows.WindowedDocumentService`**: Manages windowed documents within a UI.
 - **`Minimal.Mvvm.Windows.WindowPlacementService`**: Saves and restores window placement between runs.
 
 ### Recommended Companion Package

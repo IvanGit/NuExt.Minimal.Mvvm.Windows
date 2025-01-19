@@ -1,4 +1,4 @@
-﻿#define DEBUG_EVENTS
+﻿#define DEBUG_EVENTS_
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -24,7 +24,7 @@ namespace Minimal.Mvvm.Windows
         /// <summary>
         /// Command executed when the view is unloaded.
         /// </summary>
-        [Notify(Setter = Private)] 
+        [Notify(Setter = Private)]
         private ICommand? _unloadedCommand;
 
         #endregion
@@ -37,7 +37,7 @@ namespace Minimal.Mvvm.Windows
         protected virtual void OnLoaded()
         {
 #if DEBUG_EVENTS
-            Debug.WriteLine($"{GetType().FullName} ({DisplayName ?? "Unnamed"}) ({GetHashCode()})::OnLoaded");
+            Trace.WriteLine($"{GetType().FullName} ({DisplayName ?? "Unnamed"}) ({GetHashCode()})::OnLoaded");
 #endif
         }
 
@@ -47,7 +47,7 @@ namespace Minimal.Mvvm.Windows
         protected virtual void OnUnloaded()
         {
 #if DEBUG_EVENTS
-            Debug.WriteLine($"{GetType().FullName} ({DisplayName ?? "Unnamed"}) ({GetHashCode()})::OnUnloaded");
+            Trace.WriteLine($"{GetType().FullName} ({DisplayName ?? "Unnamed"}) ({GetHashCode()})::OnUnloaded");
 #endif
         }
 

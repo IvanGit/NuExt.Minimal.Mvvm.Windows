@@ -6,7 +6,7 @@
     <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageTags>nuext;minimal;mvvm;wpf;ui;windows;viewmodel;command;relaycommand;asynccommand;multiple;concurrent;async;servicecontainer</PackageTags>
+    <PackageTags>nuext;minimal;mvvm;wpf;ui;windows;viewmodel;command;relaycommand;asynccommand;multiple;concurrent;async;servicecontainer;asyncdocument;documentservice</PackageTags>
     <Description>NuExt.Minimal.Mvvm.Windows is an extension for the lightweight MVVM framework NuExt.Minimal.Mvvm, specifically designed for WPF applications.
 
 Commonly Used Types:
@@ -16,14 +16,16 @@ Minimal.Mvvm.Windows.DocumentContentViewModelBase
 Minimal.Mvvm.Windows.WindowViewModel
 Minimal.Mvvm.Windows.IAsyncDialogService
 Minimal.Mvvm.Windows.IAsyncDocument
+Minimal.Mvvm.Windows.IAsyncDocumentContent
 Minimal.Mvvm.Windows.IAsyncDocumentManagerService
 Minimal.Mvvm.Windows.InputDialogService
 Minimal.Mvvm.Windows.OpenWindowsService
 Minimal.Mvvm.Windows.SettingsService
 Minimal.Mvvm.Windows.TabbedDocumentService
 Minimal.Mvvm.Windows.ViewLocator
+Minimal.Mvvm.Windows.WindowedDocumentService
 Minimal.Mvvm.Windows.WindowPlacementService</Description>
-    <Version>0.3.0</Version>
+    <Version>0.3.1</Version>
     <RootNamespace>Minimal.Mvvm.Windows</RootNamespace>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
@@ -41,8 +43,8 @@ Minimal.Mvvm.Windows.WindowPlacementService</Description>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(UseNuExtPackages)' == 'true'">
-    <PackageReference Include="NuExt.Minimal.Mvvm" Version="0.3.0" />
-    <PackageReference Include="NuExt.System.Windows" Version="0.3.0" />
+    <PackageReference Include="NuExt.Minimal.Mvvm" Version="0.3.1" />
+    <PackageReference Include="NuExt.System.Windows" Version="0.3.1" />
     <PackageReference Include="NuExt.Minimal.Mvvm.SourceGenerator" Version="0.2.7">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

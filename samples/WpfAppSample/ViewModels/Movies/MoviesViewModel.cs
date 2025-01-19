@@ -53,6 +53,7 @@ namespace MovieWpfApp.ViewModels
             EditCommand?.RaiseCanExecuteChanged();
             DeleteCommand?.RaiseCanExecuteChanged();
             OpenMovieCommand?.RaiseCanExecuteChanged();
+            OpenMovieExternalCommand?.RaiseCanExecuteChanged();
         }
 
         #endregion

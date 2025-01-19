@@ -20,7 +20,9 @@
         /// <param name="parentViewModel">The parent view model of the document.</param>
         /// <param name="parameter">Additional parameters for creating the document.</param>
         /// <param name="cancellationToken">Optional cancellation token to cancel the initialization process.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the created asynchronous document.</returns>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the created asynchronous document.
+        /// </returns>
         ValueTask<IAsyncDocument> CreateDocumentAsync(string? documentType, object? viewModel, object? parentViewModel,
             object? parameter, CancellationToken cancellationToken = default);
 
@@ -33,6 +35,11 @@
         /// Occurs when the active document has changed.
         /// </summary>
         event EventHandler<ActiveDocumentChangedEventArgs>? ActiveDocumentChanged;
+
+        /// <summary>
+        /// Gets the count of documents.
+        /// </summary>
+        int Count { get; }
 
         /// <summary>
         /// Gets a collection of all open asynchronous documents.

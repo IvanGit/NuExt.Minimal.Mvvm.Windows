@@ -1,7 +1,10 @@
-﻿using Minimal.Mvvm.Windows;
+﻿using Minimal.Mvvm;
+using Minimal.Mvvm.Windows;
 using MovieWpfApp.Models;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Windows;
+using static AccessModifier;
 
 namespace MovieWpfApp.ViewModels
 {
@@ -9,7 +12,16 @@ namespace MovieWpfApp.ViewModels
     {
         #region Properties
 
+        [Notify(Setter = Private)]
+        private bool _isWindowed;
+
         public MovieModel Movie => (MovieModel)Parameter!;
+
+        #endregion
+
+        #region Services
+
+        private WindowService? WindowService => GetService<WindowService>();
 
         #endregion
 
@@ -26,6 +38,18 @@ namespace MovieWpfApp.ViewModels
         #endregion
 
         #region Methods
+
+        public override ValueTask<bool> CanCloseAsync(CancellationToken cancellationToken)
+        {
+            var dialogResult = MessageBox.Show(string.Format(Loc.Are_you_sure_you_want_to_close__Arg0__, Movie.Name), Loc.Confirmation,
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (dialogResult != MessageBoxResult.Yes)
+            {
+                return new ValueTask<bool>(false);
+            }
+
+            return base.CanCloseAsync(cancellationToken);
+        }
 
         protected override async Task OnInitializeAsync(CancellationToken cancellationToken)
         {

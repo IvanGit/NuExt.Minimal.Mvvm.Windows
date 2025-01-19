@@ -36,7 +36,7 @@ namespace Minimal.Mvvm.Windows
                 {
                     try
                     {
-                        await _viewModels[i].CloseForcedAsync();
+                        await _viewModels[i].CloseAsync(force: true);
                     }
                     catch (Exception ex)
                     {

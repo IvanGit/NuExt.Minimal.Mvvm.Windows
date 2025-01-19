@@ -26,13 +26,13 @@ namespace Minimal.Mvvm.Windows
         /// <summary>
         /// Gets or sets the header text of the menu item.
         /// </summary>
-        [Notify] 
+        [Notify]
         private string? _header;
 
         /// <summary>
         /// Gets or sets the collection of submenu items.
         /// </summary>
-        [Notify] 
+        [Notify]
         private ObservableCollection<MenuItemViewModel?>? _subMenuItems;
 
         #endregion

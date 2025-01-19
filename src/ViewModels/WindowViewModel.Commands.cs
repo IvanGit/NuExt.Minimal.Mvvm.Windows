@@ -79,19 +79,11 @@ namespace Minimal.Mvvm.Windows
         }
 
         /// <summary>
-        /// Determines whether the window can be closed. Override this method to provide custom close logic.
-        /// </summary>
-        /// <returns>True if the window can be closed; otherwise, false.</returns>
-        protected virtual bool CanClose()
-        {
-            return true;
-        }
-
-        /// <summary>
         /// Closes the window by calling the current window service.
         /// </summary>
-        public virtual void Close()
+        private void Close()
         {
+            Debug.Assert(WindowService != null, $"{nameof(WindowService)} is null");
             WindowService?.Close();
         }
 
@@ -102,21 +94,18 @@ namespace Minimal.Mvvm.Windows
         private void Closing(CancelEventArgs arg)
         {
             //https://weblog.west-wind.com/posts/2019/Sep/02/WPF-Window-Closing-Errors
+            if (arg.Cancel)
+            {
+                return;
+            }
+
             if (CancellationTokenSource.IsCancellationRequested || IsDisposed)
             {
-                Debug.Assert(arg.Cancel == false);
                 arg.Cancel = IsDisposing;//do not close while disposing
                 return;
             }
-            if (CanClose() == false)
-            {
-                arg.Cancel = false;
-                return;
-            }
-            CancellationTokenSource.Cancel();
             arg.Cancel = true;
-            //Debug.Assert(Dispatcher != null, $"{nameof(Dispatcher)} is null");
-            Dispatcher.BeginInvoke(async () => { await CloseForcedAsync(false); });
+            Dispatcher.InvokeAsync(async () => { await CloseAsync(false); });
         }
 
         /// <summary>
@@ -147,8 +136,8 @@ namespace Minimal.Mvvm.Windows
             base.CreateCommands();
 
             ContentRenderedCommand = RegisterAsyncCommand(ContentRenderedAsync);
-            CloseCommand = RegisterCommand(Close, CanClose);
-            ClosingCommand = RegisterCommand<CancelEventArgs>(Closing!);
+            CloseCommand = RegisterCommand(Close);
+            ClosingCommand = RegisterCommand<CancelEventArgs>(Closing);
             PlacementRestoredCommand = RegisterCommand(OnPlacementRestored);
             PlacementSavedCommand = RegisterCommand(OnPlacementSaved);
         }

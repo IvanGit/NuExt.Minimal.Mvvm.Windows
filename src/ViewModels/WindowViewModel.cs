@@ -45,38 +45,57 @@ namespace Minimal.Mvvm.Windows
         #region Methods
 
         /// <summary>
+        /// Determines whether the window can be closed. Override this method to provide custom close logic.
+        /// </summary>
+        /// <param name="cancellationToken">A token to cancel the operation.</param>
+        /// <returns>True if the window can be closed; otherwise, false.</returns>
+        protected virtual ValueTask<bool> CanCloseAsync(CancellationToken cancellationToken)
+        {
+            return new ValueTask<bool>(true);
+        }
+
+        /// <summary>
         /// Closes the window asynchronously, optionally forcing closure.
         /// </summary>
-        /// <param name="forceClose">If true, forces the window to close.</param>
+        /// <param name="force">If true, forces the window to close.</param>
         /// <returns>A task representing the asynchronous close operation.</returns>
-        public async ValueTask CloseForcedAsync(bool forceClose = true)
+        public async ValueTask CloseAsync(bool force = true)
         {
             Debug.Assert(CheckAccess());
             Debug.Assert(IsDisposed == false);
 
-            Debug.Assert(CancellationTokenSource.IsCancellationRequested || forceClose);
-            if (forceClose)
+            try
             {
+                if (force)
+                {
+                    WindowPlacementService?.SavePlacement();//TODO check
+                }
+                else
+                {
+                    if (await CanCloseAsync(CancellationTokenSource.Token) == false)
+                    {
+                        return;
+                    }
+                }
+
 #if NET8_0_OR_GREATER
                 await CancellationTokenSource.CancelAsync();
 #else
                 CancellationTokenSource.Cancel();
 #endif
-                WindowPlacementService?.SavePlacement();//TODO check
-            }
 
-            try
-            {
                 await DisposeAsync();
 
                 Debug.Assert(CheckAccess());
-                Debug.Assert(WindowService != null, $"{nameof(WindowService)} is null");
-                WindowService?.Close();
+                Close();
                 CancellationTokenSource.Dispose();
+            }
+            catch (OperationCanceledException)
+            {
+                //do nothing?
             }
             catch (Exception ex)
             {
-                //TODO logging
                 OnError(ex);
             }
         }

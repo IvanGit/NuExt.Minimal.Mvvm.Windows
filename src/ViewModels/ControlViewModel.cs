@@ -99,7 +99,7 @@ namespace Minimal.Mvvm.Windows
             if (IsDisposed)
             {
                 var message = $"{GetType().FullName} ({DisplayName ?? "Unnamed"}) ({GetHashCode()}) has been disposed.";
-                Debug.WriteLine(message);
+                Trace.WriteLine(message);
                 Debug.Fail(message);
                 throw new ObjectDisposedException(GetType().FullName, message);
             }

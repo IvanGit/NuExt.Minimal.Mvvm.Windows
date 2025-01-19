@@ -68,9 +68,9 @@ namespace Minimal.Mvvm.Windows
         public static string? GetViewModelTitle(object viewModel)
         {
             Throw.IfNull(viewModel);
-            if (viewModel is DocumentContentViewModelBase contentViewModelBase)
+            if (viewModel is IAsyncDocumentContent documentContent)
             {
-                return contentViewModelBase.Title;
+                return documentContent.Title;
             }
             var titleProperty = viewModel.GetType().GetProperty(TitlePropertyName);
             return titleProperty != null && titleProperty.PropertyType == typeof(string) && titleProperty is { CanRead: true } ? (string?)titleProperty.GetValue(viewModel) : null;
@@ -121,6 +121,32 @@ namespace Minimal.Mvvm.Windows
                     Mode = BindingMode.TwoWay
                 });
             }
+        }
+
+        /// <summary>
+        /// Clears the binding of the specified dependency property on the target object.
+        /// </summary>
+        /// <param name="property">The dependency property for which to clear the binding.</param>
+        /// <param name="target">The object on which to clear the binding.</param>
+        public static void ClearDataContextBinding(DependencyProperty property, DependencyObject target)
+        {
+            BindingOperations.ClearBinding(target, property);
+        }
+
+        /// <summary>
+        /// Sets a DataContext binding to the view model associated with the given view.
+        /// </summary>
+        /// <param name="view">The view from which the view model will be retrieved.</param>
+        /// <param name="property">The dependency property on the target object to which the binding will be set.</param>
+        /// <param name="target">The object on which to set the binding.</param>
+        public static void SetDataContextBinding(object? view, DependencyProperty property, DependencyObject target)
+        {
+            BindingOperations.SetBinding(target, property, new Binding()
+            {
+                Path = new PropertyPath(nameof(FrameworkElement.DataContext)),
+                Source = view,
+                Mode = BindingMode.OneWay
+            });
         }
     }
 }

@@ -4,7 +4,7 @@
     /// Provides a base class for view models that represent document content. 
     /// This class extends <see cref="ControlViewModel"/>.
     /// </summary>
-    public abstract partial class DocumentContentViewModelBase : ControlViewModel
+    public abstract partial class DocumentContentViewModelBase : ControlViewModel, IAsyncDocumentContent
     {
         #region Properties
 
@@ -21,10 +21,11 @@
         /// <summary>
         /// Determines whether the document can be closed. Override this method to provide custom close logic.
         /// </summary>
+        /// <param name="cancellationToken">A token to cancel the operation.</param>
         /// <returns>True if the document can be closed; otherwise, false.</returns>
-        public virtual bool CanClose()
+        public virtual ValueTask<bool> CanCloseAsync(CancellationToken cancellationToken)
         {
-            return true;
+            return new ValueTask<bool>(true);
         }
 
         #endregion
