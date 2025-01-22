@@ -16,7 +16,7 @@ namespace Minimal.Mvvm.Windows
                 return;
             }
             Lifetime.AddBracket(() => PropertyChanged += OnPropertyChanged, () => PropertyChanged -= OnPropertyChanged);
-            Lifetime.AddBracket(CreateCommands, NullifyCommands);//last operation after WaitAsyncCommands
+            Lifetime.AddBracket(CreateCommands, NullifyCommands);//operation after WaitAsyncCommands
             Lifetime.AddAsync(() => WaitAsyncCommands());
         }
 

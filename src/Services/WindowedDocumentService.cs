@@ -213,6 +213,7 @@ namespace Minimal.Mvvm.Windows
 
             private void CloseWindow()
             {
+                Window.Hide();
                 Window.Close();
             }
 
