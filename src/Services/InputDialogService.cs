@@ -1,6 +1,7 @@
 ﻿using Minimal.Mvvm.Windows.Controls;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Data;
 
 namespace Minimal.Mvvm.Windows
 {
@@ -11,6 +12,12 @@ namespace Minimal.Mvvm.Windows
     public class InputDialogService : DialogServiceBase, IAsyncDialogService
     {
         #region Dependency Properties
+
+        /// <summary>
+        /// Identifies the <see cref="SetTitleBinding"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty SetTitleBindingProperty = DependencyProperty.Register(
+            nameof(SetTitleBinding), typeof(bool), typeof(InputDialogService), new PropertyMetadata(false));
 
         /// <summary>
         /// Identifies the <see cref="ValidatesOnDataErrors"/> dependency property.
@@ -24,9 +31,24 @@ namespace Minimal.Mvvm.Windows
         public static readonly DependencyProperty ValidatesOnNotifyDataErrorsProperty = DependencyProperty.Register(
             nameof(ValidatesOnNotifyDataErrors), typeof(bool), typeof(InputDialogService), new PropertyMetadata(false));
 
+        /// <summary>
+        /// Identifies the <see cref="WindowStartupLocation"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty WindowStartupLocationProperty = DependencyProperty.Register(
+            nameof(WindowStartupLocation), typeof(WindowStartupLocation), typeof(InputDialogService), new PropertyMetadata(WindowStartupLocation.CenterOwner));
+
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the service should set dialog title binding
+        /// </summary>
+        public bool SetTitleBinding
+        {
+            get => (bool)GetValue(SetTitleBindingProperty);
+            set => SetValue(SetTitleBindingProperty, value);
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether the service should check for validation errors
@@ -50,6 +72,12 @@ namespace Minimal.Mvvm.Windows
             set => SetValue(ValidatesOnNotifyDataErrorsProperty, value);
         }
 
+        public WindowStartupLocation WindowStartupLocation
+        {
+            get => (WindowStartupLocation)GetValue(WindowStartupLocationProperty);
+            set => SetValue(WindowStartupLocationProperty, value);
+        }
+
         #endregion
 
         #region Methods
@@ -69,7 +97,7 @@ namespace Minimal.Mvvm.Windows
             object? parentViewModel, object? parameter, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var view = await CreateAndInitializeViewAsync(documentType, viewModel, parentViewModel, parameter, cancellationToken);
+            var view = await CreateViewAsync(documentType, cancellationToken);
 
             var dialog = new InputDialog
             {
@@ -77,11 +105,37 @@ namespace Minimal.Mvvm.Windows
                 Content = view,
                 Owner = GetWindow(),
                 Title = title ?? (viewModel != null ? ViewModelHelper.GetViewModelTitle(viewModel) : null) ?? string.Empty,
-                ValidatesOnDataErrors = ValidatesOnDataErrors,
-                ValidatesOnNotifyDataErrors = ValidatesOnNotifyDataErrors,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                WindowStartupLocation = WindowStartupLocation,
             };
-            return dialog.ShowDialog(cancellationToken);
+            ViewModelHelper.SetDataContextBinding(view, FrameworkElement.DataContextProperty, dialog);
+            BindingOperations.SetBinding(dialog, InputDialog.ValidatesOnDataErrorsProperty, new Binding()
+            {
+                Path = new PropertyPath(ValidatesOnDataErrorsProperty),
+                Source = this,
+                Mode = BindingMode.OneWay
+            });
+            BindingOperations.SetBinding(dialog, InputDialog.ValidatesOnNotifyDataErrorsProperty, new Binding()
+            {
+                Path = new PropertyPath(ValidatesOnNotifyDataErrorsProperty),
+                Source = this,
+                Mode = BindingMode.OneWay
+            });
+
+            await ViewModelHelper.InitializeViewAsync(view, viewModel, parentViewModel, parameter, cancellationToken);
+
+            if (SetTitleBinding)
+            {
+                ViewModelHelper.SetViewTitleBinding(view, Window.TitleProperty, dialog);
+            }
+
+            try
+            {
+                return dialog.ShowDialog(cancellationToken);
+            }
+            finally
+            {
+                BindingOperations.ClearAllBindings(dialog);
+            }
         }
 
         /// <summary>

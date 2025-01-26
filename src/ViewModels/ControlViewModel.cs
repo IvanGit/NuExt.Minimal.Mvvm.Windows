@@ -7,7 +7,7 @@ namespace Minimal.Mvvm.Windows
     /// <summary>
     /// Represents a base class for control-specific ViewModels, extending the functionality of the <see cref="ViewModelBase"/> class.
     /// </summary>
-    public partial class ControlViewModel : ViewModelBase, IAsyncDisposable
+    public partial class ControlViewModel : ViewModelBase, IDispatcherObject, IAsyncDisposable
     {
         public ControlViewModel()
         {

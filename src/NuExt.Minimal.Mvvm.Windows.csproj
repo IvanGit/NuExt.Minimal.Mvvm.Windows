@@ -25,7 +25,7 @@ Minimal.Mvvm.Windows.TabbedDocumentService
 Minimal.Mvvm.Windows.ViewLocator
 Minimal.Mvvm.Windows.WindowedDocumentService
 Minimal.Mvvm.Windows.WindowPlacementService</Description>
-    <Version>0.3.2</Version>
+    <Version>0.3.3</Version>
     <RootNamespace>Minimal.Mvvm.Windows</RootNamespace>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
@@ -35,9 +35,9 @@ Minimal.Mvvm.Windows.WindowPlacementService</Description>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(UseNuExtPackages)' == 'true'">
-    <PackageReference Include="NuExt.Minimal.Mvvm" Version="0.3.2" />
+    <PackageReference Include="NuExt.Minimal.Mvvm" Version="0.3.3" />
     <PackageReference Include="NuExt.System.Windows" Version="0.3.2" />
-    <PackageReference Include="NuExt.Minimal.Mvvm.SourceGenerator" Version="0.3.1">
+    <PackageReference Include="NuExt.Minimal.Mvvm.SourceGenerator" Version="0.3.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

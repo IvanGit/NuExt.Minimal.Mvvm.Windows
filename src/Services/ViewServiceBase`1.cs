@@ -102,17 +102,14 @@ namespace Minimal.Mvvm.Windows
         #region Methods
 
         /// <summary>
-        /// Creates and initializes a view asynchronously based on the specified parameters.
+        /// Creates a view asynchronously based on the specified parameters.
         /// </summary>
         /// <param name="documentType">The type of document to create the view for.</param>
-        /// <param name="viewModel">The view model associated with the view.</param>
-        /// <param name="parentViewModel">The parent view model, if any.</param>
-        /// <param name="parameter">Additional parameter for initializing the view.</param>
         /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the created view object.</returns>
-        protected ValueTask<object?> CreateAndInitializeViewAsync(string? documentType, object? viewModel, object? parentViewModel, object? parameter, CancellationToken cancellationToken)
+        protected ValueTask<object?> CreateViewAsync(string? documentType, CancellationToken cancellationToken)
         {
-            return GetViewLocator().CreateAndInitializeViewAsync(documentType, viewModel, parentViewModel, parameter, ViewTemplate, ViewTemplateSelector, cancellationToken);
+            return GetViewLocator().CreateViewAsync(documentType, ViewTemplate, ViewTemplateSelector, cancellationToken);
         }
 
         /// <summary>

@@ -79,15 +79,6 @@ namespace Minimal.Mvvm.Windows
         }
 
         /// <summary>
-        /// Closes the window by calling the current window service.
-        /// </summary>
-        private void Close()
-        {
-            Debug.Assert(WindowService != null, $"{nameof(WindowService)} is null");
-            WindowService?.Close();
-        }
-
-        /// <summary>
         /// Handles the closing event of the window, managing cancellation and disposal states.
         /// </summary>
         /// <param name="arg">The arguments for the cancel event.</param>

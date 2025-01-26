@@ -55,6 +55,15 @@ namespace Minimal.Mvvm.Windows
         }
 
         /// <summary>
+        /// Closes the window by calling the current window service.
+        /// </summary>
+        private void Close()
+        {
+            Debug.Assert(WindowService != null, $"{nameof(WindowService)} is null");
+            WindowService?.Close();
+        }
+
+        /// <summary>
         /// Closes the window asynchronously, optionally forcing closure.
         /// </summary>
         /// <param name="force">If true, forces the window to close.</param>
@@ -72,8 +81,16 @@ namespace Minimal.Mvvm.Windows
                 }
                 else
                 {
-                    if (await CanCloseAsync(CancellationTokenSource.Token) == false)
+                    try
                     {
+                        if (await CanCloseAsync(CancellationTokenSource.Token) == false)
+                        {
+                            return;
+                        }
+                    }
+                    catch (OperationCanceledException) when (CancellationTokenSource.IsCancellationRequested)
+                    {
+                        //do nothing and return
                         return;
                     }
                 }
@@ -83,21 +100,23 @@ namespace Minimal.Mvvm.Windows
 #else
                 CancellationTokenSource.Cancel();
 #endif
-
+                Hide();
                 await DisposeAsync();
 
                 Debug.Assert(CheckAccess());
                 Close();
                 CancellationTokenSource.Dispose();
             }
-            catch (OperationCanceledException)
-            {
-                //do nothing?
-            }
             catch (Exception ex)
             {
                 OnError(ex);
             }
+        }
+
+        private void Hide()
+        {
+            Debug.Assert(WindowService != null, $"{nameof(WindowService)} is null");
+            WindowService?.Hide();
         }
 
         #endregion

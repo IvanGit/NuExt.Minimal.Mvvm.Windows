@@ -221,7 +221,7 @@ namespace MovieWpfApp
 
         #endregion
 
-        #region IServiceProvider
+        #region IServiceProvider implementation
 
         public object? GetService(Type serviceType)
         {

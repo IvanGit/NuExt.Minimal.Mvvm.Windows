@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 
@@ -77,30 +78,43 @@ namespace Minimal.Mvvm.Windows
         }
 
         /// <summary>
-        /// Checks if the provided ViewModel has a 'Title' property that is readable and writable.
+        /// Initializes the view and view model asynchronously based on the specified parameters.
         /// </summary>
-        /// <param name="viewModel">The ViewModel object to check.</param>
-        /// <returns>Returns true if the ViewModel contains a 'Title' property that can be read from and written to; otherwise, false.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when the provided viewModel is null.</exception>
-        public static bool ViewModelHasTitleProperty(object viewModel)
+        /// <param name="view">The view to initialize.</param>
+        /// <param name="viewModel">The view model associated with the view.</param>
+        /// <param name="parentViewModel">The parent view model, if any.</param>
+        /// <param name="parameter">Additional parameter for initializing the view.</param>
+        /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public static async ValueTask InitializeViewAsync(object? view, object? viewModel, object? parentViewModel, object? parameter, CancellationToken cancellationToken)
         {
-            Throw.IfNull(viewModel);
-            if (viewModel is DocumentContentViewModelBase)
+            cancellationToken.ThrowIfCancellationRequested();
+            AttachViewModel(view, viewModel);//first, attach
+            if (viewModel is ViewModelBase viewModelBase)//second, initialize
             {
-                return true;
+                viewModelBase.ParentViewModel ??= parentViewModel;
+                viewModelBase.Parameter ??= parameter;
+                if (!viewModelBase.IsInitialized)
+                {
+                    await viewModelBase.InitializeAsync(cancellationToken).ConfigureAwait(false);
+                }
             }
-            var titleProperty = viewModel.GetType().GetProperty(TitlePropertyName);
-            return titleProperty != null && titleProperty.PropertyType == typeof(string) && titleProperty is { CanRead: true, CanWrite: true };
         }
 
         /// <summary>
-        /// Clears the binding of the specified dependency property on the target object.
+        /// Sets a DataContext binding to the view model associated with the given view.
         /// </summary>
-        /// <param name="property">The dependency property for which to clear the binding.</param>
-        /// <param name="target">The object on which to clear the binding.</param>
-        public static void ClearViewTitleBinding(DependencyProperty property, DependencyObject target)
+        /// <param name="view">The view from which the view model will be retrieved.</param>
+        /// <param name="property">The dependency property on the target object to which the binding will be set.</param>
+        /// <param name="target">The object on which to set the binding.</param>
+        public static void SetDataContextBinding(object? view, DependencyProperty property, DependencyObject target)
         {
-            BindingOperations.ClearBinding(target, property);
+            BindingOperations.SetBinding(target, property, new Binding()
+            {
+                Path = new PropertyPath(nameof(FrameworkElement.DataContext)),
+                Source = view,
+                Mode = BindingMode.OneWay
+            });
         }
 
         /// <summary>
@@ -121,32 +135,24 @@ namespace Minimal.Mvvm.Windows
                     Mode = BindingMode.TwoWay
                 });
             }
+            Debug.Assert(viewModel != null);
         }
 
         /// <summary>
-        /// Clears the binding of the specified dependency property on the target object.
+        /// Checks if the provided ViewModel has a 'Title' property that is readable and writable.
         /// </summary>
-        /// <param name="property">The dependency property for which to clear the binding.</param>
-        /// <param name="target">The object on which to clear the binding.</param>
-        public static void ClearDataContextBinding(DependencyProperty property, DependencyObject target)
+        /// <param name="viewModel">The ViewModel object to check.</param>
+        /// <returns>Returns true if the ViewModel contains a 'Title' property that can be read from and written to; otherwise, false.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the provided viewModel is null.</exception>
+        public static bool ViewModelHasTitleProperty(object viewModel)
         {
-            BindingOperations.ClearBinding(target, property);
-        }
-
-        /// <summary>
-        /// Sets a DataContext binding to the view model associated with the given view.
-        /// </summary>
-        /// <param name="view">The view from which the view model will be retrieved.</param>
-        /// <param name="property">The dependency property on the target object to which the binding will be set.</param>
-        /// <param name="target">The object on which to set the binding.</param>
-        public static void SetDataContextBinding(object? view, DependencyProperty property, DependencyObject target)
-        {
-            BindingOperations.SetBinding(target, property, new Binding()
+            Throw.IfNull(viewModel);
+            if (viewModel is DocumentContentViewModelBase)
             {
-                Path = new PropertyPath(nameof(FrameworkElement.DataContext)),
-                Source = view,
-                Mode = BindingMode.OneWay
-            });
+                return true;
+            }
+            var titleProperty = viewModel.GetType().GetProperty(TitlePropertyName);
+            return titleProperty != null && titleProperty.PropertyType == typeof(string) && titleProperty is { CanRead: true, CanWrite: true };
         }
     }
 }

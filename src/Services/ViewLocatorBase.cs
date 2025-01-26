@@ -6,30 +6,11 @@ using System.Windows.Controls;
 namespace Minimal.Mvvm.Windows
 {
     /// <summary>
-    /// An abstract base class that provides methods to locate and initialize views based on view models.
+    /// An abstract base class that provides methods to locate and initialize views.
     /// </summary>
     public abstract class ViewLocatorBase
     {
         #region Methods
-
-        /// <summary>
-        /// Creates and initializes a view asynchronously based on the specified parameters.
-        /// </summary>
-        /// <param name="documentType">The type of document to create the view for.</param>
-        /// <param name="viewModel">The view model associated with the view.</param>
-        /// <param name="parentViewModel">The parent view model, if any.</param>
-        /// <param name="parameter">Additional parameter for initializing the view.</param>
-        /// <param name="viewTemplate">The data template used for the view.</param>
-        /// <param name="viewTemplateSelector">The data template selector used to select the appropriate data template.</param>
-        /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the created and initialized view object.</returns>
-        public virtual async ValueTask<object?> CreateAndInitializeViewAsync(string? documentType, object? viewModel, object? parentViewModel, object? parameter, DataTemplate? viewTemplate, DataTemplateSelector? viewTemplateSelector, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            var view = await CreateViewAsync(documentType, viewTemplate, viewTemplateSelector, cancellationToken);
-            await InitializeViewAsync(view, viewModel, parentViewModel, parameter, cancellationToken).ConfigureAwait(false);
-            return view;
-        }
 
         /// <summary>
         /// Creates a view asynchronously based on the specified parameters.
@@ -104,30 +85,6 @@ namespace Minimal.Mvvm.Windows
             else if (ViewModelBase.IsInDesignMode) errorMessage = $"[{viewName}]";
             else errorMessage = $"\"{viewName}\" type not found.";
             return new FallbackView() { Text = errorMessage };
-        }
-
-        /// <summary>
-        /// Initializes the view asynchronously based on the specified parameters.
-        /// </summary>
-        /// <param name="view">The view to initialize.</param>
-        /// <param name="viewModel">The view model associated with the view.</param>
-        /// <param name="parentViewModel">The parent view model, if any.</param>
-        /// <param name="parameter">Additional parameter for initializing the view.</param>
-        /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        public virtual async ValueTask InitializeViewAsync(object? view, object? viewModel, object? parentViewModel, object? parameter, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ViewModelHelper.AttachViewModel(view, viewModel);//first, attach
-            if (viewModel is ViewModelBase viewModelBase)//second, initialize
-            {
-                viewModelBase.ParentViewModel ??= parentViewModel;
-                viewModelBase.Parameter ??= parameter;
-                if (!viewModelBase.IsInitialized)
-                {
-                    await viewModelBase.InitializeAsync(cancellationToken).ConfigureAwait(false);
-                }
-            }
         }
 
         #endregion

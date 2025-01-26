@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace Minimal.Mvvm.Windows
 {
@@ -29,9 +30,7 @@ namespace Minimal.Mvvm.Windows
                 _lifetime.AddDisposable(CancellationTokenSource);
                 _lifetime.AddBracket(() => owner._documents.Add(this), () => owner._documents.Remove(this));
                 _lifetime.Add(() => Window.ClearStyle());
-                _lifetime.AddBracket(
-                    () => ViewModelHelper.SetDataContextBinding(Window.Content, FrameworkElement.DataContextProperty, Window),
-                    () => ViewModelHelper.ClearDataContextBinding(FrameworkElement.DataContextProperty, Window));
+                _lifetime.Add(() => BindingOperations.ClearBinding(Window, FrameworkElement.DataContextProperty));
                 _lifetime.Add(DetachContent);
                 _lifetime.AddAsync(DisposeViewModelAsync);
                 _lifetime.AddBracket(() => SetDocument(Window, this), () => SetDocument(Window, null));
@@ -49,7 +48,7 @@ namespace Minimal.Mvvm.Windows
                     () => Window.Deactivated -= OnWindowDeactivated);
                 _lifetime.AddBracket(
                     () => ViewModelHelper.SetViewTitleBinding(Window.Content, Window.TitleProperty, Window),
-                    () => ViewModelHelper.ClearViewTitleBinding(Window.TitleProperty, Window));
+                    () => BindingOperations.ClearBinding(Window, Window.TitleProperty));
 
                 var dpd = DependencyPropertyDescriptor.FromProperty(Window.TitleProperty, typeof(Window));
                 if (dpd != null)
@@ -362,7 +361,7 @@ namespace Minimal.Mvvm.Windows
         {
             if (e.PropertyName == nameof(_documents.Count))
             {
-                OnPropertyChanged(nameof(Count));
+                OnPropertyChanged(EventArgsCache.CountPropertyChanged);
             }
         }
 
@@ -379,13 +378,16 @@ namespace Minimal.Mvvm.Windows
             if (documentType == null && ViewTemplate == null && ViewTemplateSelector == null)
             {
                 view = GetUnresolvedView() ?? await GetViewLocator().GetOrCreateViewAsync(documentType, cancellationToken);
-                await GetViewLocator().InitializeViewAsync(view, viewModel, parentViewModel, parameter, cancellationToken);
             }
             else
             {
-                view = await CreateAndInitializeViewAsync(documentType, viewModel, parentViewModel, parameter, cancellationToken);
+                view = await CreateViewAsync(documentType, cancellationToken);
             }
+
             var window = CreateWindow(view, viewModel);
+            ViewModelHelper.SetDataContextBinding(view, FrameworkElement.DataContextProperty, window);
+
+            await ViewModelHelper.InitializeViewAsync(view, viewModel, parentViewModel, parameter, cancellationToken);
 
             var document = new WindowedDocument(this, window);
             return document;
