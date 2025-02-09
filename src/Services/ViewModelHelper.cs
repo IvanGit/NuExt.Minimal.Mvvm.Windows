@@ -89,15 +89,18 @@ namespace Minimal.Mvvm.Windows
         public static async ValueTask InitializeViewAsync(object? view, object? viewModel, object? parentViewModel, object? parameter, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            AttachViewModel(view, viewModel);//first, attach
-            if (viewModel is ViewModelBase viewModelBase)//second, initialize
+            // First, initialize parameters before data context is set
+            if (viewModel is ViewModelBase viewModelBase)
             {
                 viewModelBase.ParentViewModel ??= parentViewModel;
                 viewModelBase.Parameter ??= parameter;
-                if (!viewModelBase.IsInitialized)
-                {
-                    await viewModelBase.InitializeAsync(cancellationToken).ConfigureAwait(false);
-                }
+            }
+            // Second, attach the view model to the view
+            AttachViewModel(view, viewModel);
+            // Third, initialize the view model asynchronously if it has not been initialized yet
+            if (viewModel is ViewModelBase { IsInitialized: false } initializable)
+            {
+                await initializable.InitializeAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 

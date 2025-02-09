@@ -25,7 +25,7 @@ Minimal.Mvvm.Windows.TabbedDocumentService
 Minimal.Mvvm.Windows.ViewLocator
 Minimal.Mvvm.Windows.WindowedDocumentService
 Minimal.Mvvm.Windows.WindowPlacementService</Description>
-    <Version>0.3.3</Version>
+    <Version>0.3.4</Version>
     <RootNamespace>Minimal.Mvvm.Windows</RootNamespace>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
