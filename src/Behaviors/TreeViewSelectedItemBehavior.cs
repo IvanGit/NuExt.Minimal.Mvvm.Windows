@@ -39,27 +39,27 @@ namespace Minimal.Mvvm.Windows
 
             var tree = behavior.AssociatedObject;
             if (tree == null) return;
-
-            if (e.NewValue == null)
+            if (tree.IsLoaded == false)
             {
-                foreach (var item in tree.Items.OfType<TreeViewItem>())
-                {
-                    item.SetValue(TreeViewItem.IsSelectedProperty, false);
-                }
                 return;
             }
 
-            if (e.NewValue is TreeViewItem treeViewItem)
+            SelectItem(tree, e.NewValue);
+        }
+
+        private void OnTreeViewLoaded(object sender, RoutedEventArgs e)
+        {
+            Debug.Assert(!_inSelectedItemChanged);
+            if (_inSelectedItemChanged)
             {
-                treeViewItem.SetValue(TreeViewItem.IsSelectedProperty, true);
-                //treeViewItem.Focus();
                 return;
             }
 
-            var dataBoundTreeViewItem = tree.GetTreeViewItem(e.NewValue);
-            Debug.Assert(dataBoundTreeViewItem != null);
-            if (dataBoundTreeViewItem == null) return;
-            dataBoundTreeViewItem.SetValue(TreeViewItem.IsSelectedProperty, true);
+            if (sender is not TreeView tree) return;
+            if (tree.SelectedItem != SelectedItem)
+            {
+                SelectItem(tree, SelectedItem);
+            }
         }
 
         private void OnTreeViewSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -83,6 +83,7 @@ namespace Minimal.Mvvm.Windows
         protected override void OnAttached()
         {
             base.OnAttached();
+            AssociatedObject!.Loaded += OnTreeViewLoaded;
             AssociatedObject!.SelectedItemChanged += OnTreeViewSelectedItemChanged;
         }
 
@@ -91,9 +92,34 @@ namespace Minimal.Mvvm.Windows
         {
             if (AssociatedObject != null)
             {
+                AssociatedObject.Loaded -= OnTreeViewLoaded;
                 AssociatedObject.SelectedItemChanged -= OnTreeViewSelectedItemChanged;
             }
             base.OnDetaching();
+        }
+
+        private static void SelectItem(TreeView tree, object? newItem)
+        {
+            if (newItem == null)
+            {
+                foreach (var item in tree.Items.OfType<TreeViewItem>())
+                {
+                    item.SetValue(TreeViewItem.IsSelectedProperty, false);
+                }
+                return;
+            }
+
+            if (newItem is TreeViewItem treeViewItem)
+            {
+                treeViewItem.SetValue(TreeViewItem.IsSelectedProperty, true);
+                //treeViewItem.Focus();
+                return;
+            }
+
+            var dataBoundTreeViewItem = tree.GetTreeViewItem(newItem);
+            Debug.Assert(dataBoundTreeViewItem != null);
+            if (dataBoundTreeViewItem == null) return;
+            dataBoundTreeViewItem.SetValue(TreeViewItem.IsSelectedProperty, true);
         }
 
         #endregion
