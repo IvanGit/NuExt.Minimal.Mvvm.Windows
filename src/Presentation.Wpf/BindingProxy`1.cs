@@ -60,9 +60,9 @@
         /// </summary>
         /// <returns>A new instance of <see cref="BindingProxy{T}"/>.</returns>
         /// <seealso cref="Freezable.CreateInstanceCore()"/>
-        protected override Freezable? CreateInstanceCore()
+        protected override Freezable CreateInstanceCore()
         {
-            return (Freezable?)Activator.CreateInstance(GetType());
+            return (Freezable)Activator.CreateInstance(GetType())!;
         }
 
         protected virtual void OnDataContextChanged(T? oldValue, T? newValue)

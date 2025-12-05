@@ -28,7 +28,7 @@ namespace System.Windows.Controls
             Debug.Assert(mi != null);
 
             //virtualizingPanel.BringIndexIntoView(index);
-            mi?.Invoke(virtualizingPanel, new object[] { index });//TODO to delegate
+            mi?.Invoke(virtualizingPanel, [index]);//TODO to delegate
         }
     }
 }
