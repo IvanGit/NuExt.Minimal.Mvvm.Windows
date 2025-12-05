@@ -97,7 +97,7 @@ namespace MovieWpfApp.ViewModels
         protected override ValueTask<bool> CanCloseAsync(CancellationToken cancellationToken)
         {
             MessageBoxResult result = MessageBox.Show(
-                string.Format(Loc.Are_you_sure_you_want_to_close__Arg0__, $"{AssemblyInfo.Product}"),
+                string.Format(Loc.Are_you_sure_you_want_to_close__Arg0__, $"{AssemblyInfo.Current.Product}"),
                 Loc.Confirmation,
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
@@ -200,7 +200,7 @@ namespace MovieWpfApp.ViewModels
             {
                 sb.Append($"{doc.Title} - ");
             }
-            sb.Append($"{AssemblyInfo.Product} v{AssemblyInfo.Version?.ToString(3)}");
+            sb.Append($"{AssemblyInfo.Current.Product} v{AssemblyInfo.Current.Version?.ToString(3)}");
             var window = ActiveWindow;
             if (window != null)
             {

@@ -9,6 +9,19 @@ namespace Minimal.Mvvm
     public static class CommandExtensions
     {
         /// <summary>
+        /// Retrieves all commands defined in the ViewModel.
+        /// </summary>
+        /// <param name="viewModel">ViewModel.</param>
+        /// <returns>A list of tuples containing command names and their corresponding <see cref="ICommand"/> instances.</returns>
+        public static IList<(string PropertyName, ICommand? Command)> GetAllCommands<T>(this T viewModel) where T : ViewModelBase
+        {
+            var commandProperties = viewModel.GetType()
+                .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                .Where(prop => typeof(ICommand).IsAssignableFrom(prop.PropertyType) && prop.CanRead);
+            return commandProperties.Select(prop => (prop.Name, (ICommand?)prop.GetValue(viewModel))).ToList();
+        }
+
+        /// <summary>
         /// Raises the <see cref="ICommand.CanExecuteChanged"/> event.
         /// </summary>
         /// <param name="command">The command to raise the CanExecuteChanged event for.</param>

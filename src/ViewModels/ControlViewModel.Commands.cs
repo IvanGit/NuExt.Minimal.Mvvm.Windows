@@ -80,19 +80,6 @@ namespace Minimal.Mvvm.Windows
         }
 
         /// <summary>
-        /// Retrieves all commands defined in the ViewModel.
-        /// </summary>
-        /// <returns>A list of tuples containing command names and their corresponding <see cref="ICommand"/> instances.</returns>
-        protected IList<(string Name, ICommand? Value)> GetAllCommands()
-        {
-            var commandProperties = GetType()
-                .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                .Where(prop => typeof(ICommand).IsAssignableFrom(prop.PropertyType) && prop.CanRead);
-            return commandProperties.Select(prop => (prop.Name, (ICommand?)prop.GetValue(this))).ToList();
-
-        }
-
-        /// <summary>
         /// Retrieves the asynchronous command associated with the calling method's name.
         /// </summary>
         /// <param name="callerName">The name of the calling method (automatically provided).</param>

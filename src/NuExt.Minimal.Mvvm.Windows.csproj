@@ -1,10 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0-windows;net8.0-windows;net6.0-windows;net462</TargetFrameworks>
+    <TargetFrameworks>net10.0-windows;net9.0-windows;net8.0-windows;net471;net462</TargetFrameworks>
+    <!-- System.ValueTuple is inbox on .NET Framework >= 4.7.1 and therefore any potential redirect for it should be removed.
+         This is necessary as the assembly version in the already shipped packages is higher than what's provided inbox on .NET Framework. -->
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors Condition="'$(Configuration)' == 'Release'">true</TreatWarningsAsErrors>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageTags>nuext;minimal;mvvm;wpf;ui;windows;viewmodel;command;relaycommand;asynccommand;multiple;concurrent;async;servicecontainer;asyncdocument;documentservice</PackageTags>
     <Description>NuExt.Minimal.Mvvm.Windows is an extension for the lightweight MVVM framework NuExt.Minimal.Mvvm, specifically designed for WPF applications.
@@ -25,19 +28,19 @@ Minimal.Mvvm.Windows.TabbedDocumentService
 Minimal.Mvvm.Windows.ViewLocator
 Minimal.Mvvm.Windows.WindowedDocumentService
 Minimal.Mvvm.Windows.WindowPlacementService</Description>
-    <Version>0.3.5</Version>
+    <Version>0.4.0</Version>
     <RootNamespace>Minimal.Mvvm.Windows</RootNamespace>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);1591</NoWarn>
+    <NoWarn>$(NoWarn);1591;NETSDK1233</NoWarn>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>logo128.png</PackageIcon>
     <PackageProjectUrl>https://github.com/IvanGit/NuExt.Minimal.Mvvm.Windows</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(UseNuExtPackages)' == 'true'">
-    <PackageReference Include="NuExt.Minimal.Mvvm" Version="0.3.4" />
-    <PackageReference Include="NuExt.System.Windows" Version="0.3.3" />
-    <PackageReference Include="NuExt.Minimal.Mvvm.SourceGenerator" Version="0.3.2">
+    <PackageReference Include="NuExt.Minimal.Mvvm" Version="0.4.0" />
+    <PackageReference Include="NuExt.System.Windows" Version="0.4.0" />
+    <PackageReference Include="NuExt.Minimal.Mvvm.SourceGenerator" Version="0.4.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

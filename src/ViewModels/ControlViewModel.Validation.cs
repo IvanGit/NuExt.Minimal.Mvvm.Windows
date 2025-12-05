@@ -26,8 +26,8 @@ namespace Minimal.Mvvm.Windows
 
             Debug.Assert(_asyncCommands.IsEmpty, $"{typeName} ({displayName}) ({hashCode}) has {_asyncCommands.Count} registered commands.");
 
-            var commands = GetAllCommands();
-            Debug.Assert(commands.All(c => c.Value is null));
+            var commands = this.GetAllCommands();
+            Debug.Assert(commands.All(c => c.Command is null));
 
             //Debug.Assert(CheckAccess());
         }

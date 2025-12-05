@@ -249,8 +249,9 @@ namespace Minimal.Mvvm.Windows
 
             public void Show()
             {
-                Window.Show();
-                Window.Activate();
+                Window.BringToFront();
+                //Window.Show();
+                //Window.Activate();
             }
 
             #endregion
