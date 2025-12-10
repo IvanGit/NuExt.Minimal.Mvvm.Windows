@@ -1,5 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -256,7 +259,7 @@ namespace Minimal.Mvvm.Windows
         /// <param name="items">The list of selected items.</param>
         private static void SetSelectedItemsAsString(ComboBox comboBox, IList? items)
         {
-            var sb = new ValueStringBuilder();
+            var sb = new ValueStringBuilder(stackalloc char[128]);
             if (items is { Count: > 0 })
             {
                 var s = string.Empty;

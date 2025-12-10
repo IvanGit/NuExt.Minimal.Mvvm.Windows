@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Linq;
 
 namespace Minimal.Mvvm.Windows
 {
@@ -12,8 +13,10 @@ namespace Minimal.Mvvm.Windows
             var hashCode = GetHashCode();
 
             Debug.Assert(CheckAccess());
-            Debug.Assert(_asyncCommands.IsEmpty ||
-                         _asyncCommands.All(pair => pair.Value.IsExecuting == false || pair.Value.IsCancellationRequested),
+
+            var asyncCommands = GetAllAsyncCommands();
+            Debug.Assert(asyncCommands.Count == 0 ||
+                         asyncCommands.All(pair => pair.Command.IsExecuting == false || pair.Command.IsCancellationRequested),
                 $"{typeName} ({displayName}) ({hashCode}) has unexpected state of async commands.");
         }
 
@@ -24,12 +27,8 @@ namespace Minimal.Mvvm.Windows
             var displayName = DisplayName ?? "Unnamed";
             var hashCode = GetHashCode();
 
-            Debug.Assert(_asyncCommands.IsEmpty, $"{typeName} ({displayName}) ({hashCode}) has {_asyncCommands.Count} registered commands.");
-
             var commands = this.GetAllCommands();
-            Debug.Assert(commands.All(c => c.Command is null));
-
-            //Debug.Assert(CheckAccess());
+            Debug.Assert(commands.All(c => c.Command is null), $"{typeName} ({displayName}) ({hashCode}) has not nullified commands.");
         }
     }
 }

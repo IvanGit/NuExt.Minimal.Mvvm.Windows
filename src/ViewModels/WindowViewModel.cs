@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Minimal.Mvvm.Windows
 {
@@ -72,6 +75,9 @@ namespace Minimal.Mvvm.Windows
         {
             Debug.Assert(CheckAccess());
             Debug.Assert(IsDisposed == false);
+
+            VerifyAccess();
+            CheckDisposed();
 
             try
             {

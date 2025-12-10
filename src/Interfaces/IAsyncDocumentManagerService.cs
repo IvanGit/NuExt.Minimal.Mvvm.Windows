@@ -1,4 +1,9 @@
-﻿namespace Minimal.Mvvm.Windows
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Minimal.Mvvm.Windows
 {
     /// <summary>
     /// Represents the event arguments for the ActiveDocumentChanged event.

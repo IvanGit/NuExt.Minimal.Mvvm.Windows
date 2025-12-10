@@ -41,7 +41,9 @@ namespace MovieWpfApp.ViewModels
 
         public override ValueTask<bool> CanCloseAsync(CancellationToken cancellationToken)
         {
-            var dialogResult = MessageBox.Show(string.Format(Loc.Are_you_sure_you_want_to_close__Arg0__, Movie.Name), Loc.Confirmation,
+            VerifyAccess();
+
+            var dialogResult = MessageBox.Show(WindowService?.Window, string.Format(Loc.Are_you_sure_you_want_to_close__Arg0__, Movie.Name), Loc.Confirmation,
                 MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (dialogResult != MessageBoxResult.Yes)
             {

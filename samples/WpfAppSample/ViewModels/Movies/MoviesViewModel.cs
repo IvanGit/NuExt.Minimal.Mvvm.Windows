@@ -69,8 +69,15 @@ namespace MovieWpfApp.ViewModels
 
         protected override void OnError(Exception ex, [CallerMemberName] string? callerName = null)
         {
-            base.OnError(ex, callerName);
-            MessageBox.Show(string.Format(Loc.An_error_has_occurred_in_Arg0_Arg1, callerName, ex.Message), Loc.Error, MessageBoxButton.OK, MessageBoxImage.Error);
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.Invoke(new Action<Exception, string?>(OnError), ex, callerName);
+                return;
+            }
+
+            VerifyAccess();
+
+            MessageBox.Show(GetService<WindowService>()?.Window, string.Format(Loc.An_error_has_occurred_in_Arg0_Arg1, callerName, ex.Message), Loc.Error, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         protected override async Task OnInitializeAsync(CancellationToken cancellationToken)

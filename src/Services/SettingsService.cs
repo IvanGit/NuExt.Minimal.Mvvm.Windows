@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -67,20 +68,12 @@ namespace Minimal.Mvvm.Windows
         /// <returns>The constructed filename.</returns>
         private string GetFileName(string name)
         {
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(name);
-#else
-            Throw.IfNullOrEmpty(name);
-#endif
             var sb = new ValueStringBuilder(260);
             if (!string.IsNullOrEmpty(Prefix))
             {
                 sb.Append(Prefix);
-#if NET8_0_OR_GREATER
-                if (!Prefix.EndsWith('.'))
-#else
-                if (!Prefix!.EndsWith("."))
-#endif
+                if (!Prefix!.EndsWith('.'))
                 {
                     sb.Append('.');
                 }
@@ -101,16 +94,8 @@ namespace Minimal.Mvvm.Windows
         public bool LoadSettings(SettingsBase settings, string name = "Settings", JsonSerializerOptions? options = null)
         {
             Debug.Assert(settings != null, "settings is null");
-#if NET
             ArgumentNullException.ThrowIfNull(settings);
-#else
-            Throw.IfNull(settings);
-#endif
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(name);
-#else
-            Throw.IfNullOrEmpty(name);
-#endif
 
             try
             {
@@ -157,16 +142,8 @@ namespace Minimal.Mvvm.Windows
         public bool SaveSettings(SettingsBase settings, string name = "Settings", JsonSerializerOptions? options = null)
         {
             Debug.Assert(settings != null, "settings is null");
-#if NET
             ArgumentNullException.ThrowIfNull(settings);
-#else
-            Throw.IfNull(settings);
-#endif
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(name);
-#else
-            Throw.IfNullOrEmpty(name);
-#endif
 
             try
             {

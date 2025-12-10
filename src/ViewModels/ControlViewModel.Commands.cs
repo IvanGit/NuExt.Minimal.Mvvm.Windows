@@ -1,9 +1,10 @@
-﻿#define DEBUG_EVENTS_
-using System.Collections.Concurrent;
-using System.ComponentModel;
+﻿#define TRACE_EVENTS
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using static AccessModifier;
 
@@ -11,19 +12,29 @@ namespace Minimal.Mvvm.Windows
 {
     partial class ControlViewModel
     {
-        private readonly ConcurrentDictionary<string, IAsyncCommand> _asyncCommands = new();
-
         #region Commands
 
         /// <summary>
         /// Command executed when the view is loaded.
         /// </summary>
+        /// <remarks>
+        /// This command should be bound to the control in the view to handle the Loaded event. For example:
+        /// <code>
+        /// &lt;minimal:EventTrigger EventName="Loaded" Command="{Binding LoadedCommand}" /&gt;
+        /// </code>
+        /// </remarks>
         [Notify(Setter = Private)]
         private ICommand? _loadedCommand;
 
         /// <summary>
         /// Command executed when the view is unloaded.
         /// </summary>
+        /// <remarks>
+        /// This command should be bound to the control in the view to handle the Unloaded event. For example:
+        /// <code>
+        /// &lt;minimal:EventTrigger EventName="Unloaded" Command="{Binding UnloadedCommand}" /&gt;
+        /// </code>
+        /// </remarks>
         [Notify(Setter = Private)]
         private ICommand? _unloadedCommand;
 
@@ -34,9 +45,15 @@ namespace Minimal.Mvvm.Windows
         /// <summary>
         /// Method to be called when the view is loaded.
         /// </summary>
+        /// <remarks>
+        /// The LoadedCommand should be bound to the control in the view to handle the Loaded event. For example:
+        /// <code>
+        /// &lt;minimal:EventTrigger EventName="Loaded" Command="{Binding LoadedCommand}" /&gt;
+        /// </code>
+        /// </remarks>
         protected virtual void OnLoaded()
         {
-#if DEBUG_EVENTS
+#if TRACE_EVENTS
             Trace.WriteLine($"{GetType().FullName} ({DisplayName ?? "Unnamed"}) ({GetHashCode()})::OnLoaded");
 #endif
         }
@@ -44,9 +61,15 @@ namespace Minimal.Mvvm.Windows
         /// <summary>
         /// Method to be called when the view is unloaded.
         /// </summary>
+        /// <remarks>
+        /// The UnloadedCommand should be bound to the control in the view to handle the Unloaded event. For example:
+        /// <code>
+        /// &lt;minimal:EventTrigger EventName="Unloaded" Command="{Binding UnloadedCommand}" /&gt;
+        /// </code>
+        /// </remarks>
         protected virtual void OnUnloaded()
         {
-#if DEBUG_EVENTS
+#if TRACE_EVENTS
             Trace.WriteLine($"{GetType().FullName} ({DisplayName ?? "Unnamed"}) ({GetHashCode()})::OnUnloaded");
 #endif
         }
@@ -59,103 +82,147 @@ namespace Minimal.Mvvm.Windows
         /// Cancels all executing asynchronous commands.
         /// </summary>
         /// <remarks>
-        /// This method iterates through all commands stored in the internal collection
-        /// and calls the <see cref="IAsyncCommand.Cancel"/> on each one.
+        /// This method calls the <see cref="IAsyncCommand.Cancel"/> on each one.
         /// </remarks>
         public void CancelAsyncCommands()
         {
-            foreach (var pair in _asyncCommands)
+            CheckDisposed();
+
+            scoped var commandBuilder = new ValueListBuilder<(string PropertyName, ICommand? Command)>([default, default, default, default, default, default, default, default]);
+            GetAllCommands(ref commandBuilder);
+            foreach (var (_, command) in commandBuilder.AsSpan())
             {
-                pair.Value.Cancel();
+                if (command is IAsyncCommand asyncCommand)
+                {
+                    asyncCommand.Cancel();
+                }
             }
+            commandBuilder.Dispose();
         }
 
         /// <summary>
-        /// Intended for creating and registering commands as needed.
+        /// Intended for creating commands as needed.
         /// </summary>
+        /// <remarks>
+        /// When inheriting from this class, you should override this method to create commands defined in your ViewModel.
+        /// Ensure to call the base implementation to include commands from the base class.
+        /// </remarks>
         protected virtual void CreateCommands()
         {
-            LoadedCommand = RegisterCommand(OnLoaded);
-            UnloadedCommand = RegisterCommand(OnUnloaded);
+            LoadedCommand = new RelayCommand(OnLoaded);
+            UnloadedCommand = new RelayCommand(OnUnloaded);
         }
 
         /// <summary>
-        /// Retrieves the asynchronous command associated with the calling method's name.
+        /// Retrieves the currently executing command associated with the calling method.
         /// </summary>
-        /// <param name="callerName">The name of the calling method (automatically provided).</param>
-        /// <returns>The <see cref="IAsyncCommand"/> associated with the calling method's name, if found; otherwise, null.</returns>
-        /// <exception cref="ArgumentException">Thrown when <paramref name="callerName"/> is null or empty.</exception>
-        protected IAsyncCommand? GetAsyncCommand([CallerMemberName] string? callerName = null)
+        /// <param name="callerName">The name of the calling method. This parameter is automatically provided by the compiler.</param>
+        /// <returns>The <see cref="ICommand"/> associated with the calling method, or null if no command is found.</returns>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="callerName"/> is null or empty, or command not found.</exception>
+        /// <remarks>
+        /// This method uses the <see cref="CallerMemberNameAttribute"/> to determine the name of the calling method automatically,
+        /// making it easier to retrieve the appropriate command without explicitly passing the method name.
+        /// When inheriting from this class, you should override this method to handle commands defined in your ViewModel.
+        /// Ensure to call the base implementation to handle commands from the base class.
+        /// This method is intended to be called from within a command method to obtain the associated command instance.
+        /// </remarks>
+        protected virtual ICommand? GetCurrentCommand([CallerMemberName] string? callerName = null)
         {
             Debug.Assert(!string.IsNullOrEmpty(callerName), $"{nameof(callerName)} is null or empty");
             Throw.IfNullOrEmpty(callerName);
-            Debug.Assert(_asyncCommands.ContainsKey(callerName), $"Can't find command {callerName}");
-            if (!_asyncCommands.TryGetValue(callerName, out var command))
+            return callerName switch
             {
-                return default;
+                nameof(OnLoaded) => LoadedCommand,
+                nameof(OnUnloaded) => UnloadedCommand,
+                _ => throw new ArgumentException($"Command for method '{callerName}' was not found.", nameof(callerName))
+            };
+        }
+
+        /// <summary>
+        /// Retrieves all commands recursively from the current ViewModel and its base classes, adding them to the provided list.
+        /// </summary>
+        /// <param name="builder">A list of tuples containing property  names and their corresponding <see cref="ICommand"/> instances.</param>
+        /// <remarks>
+        /// When inheriting from this class, you should override this method to add commands that are defined in your ViewModel.
+        /// Ensure to call the base implementation to include commands from the base class.
+        /// Note: Do not reassign the builder parameter within this method. Instead, use the provided builder to add commands.
+        /// </remarks>
+        protected virtual void GetAllCommands(ref ValueListBuilder<(string PropertyName, ICommand? Command)> builder)
+        {
+            builder.Append((nameof(LoadedCommand), LoadedCommand));
+            builder.Append((nameof(UnloadedCommand), UnloadedCommand));
+        }
+
+        /// <summary>
+        /// Nullifies all commands in the ViewModel.
+        /// This is useful for cleanup purposes before the ViewModel is disposed.
+        /// </summary>
+        /// <remarks>
+        /// When inheriting from this class, you should override this method to nullify commands defined in your ViewModel.
+        /// Ensure to call the base implementation to nullify commands from the base class.
+        /// </remarks>
+        protected virtual void NullifyCommands()
+        {
+            LoadedCommand = null;
+            UnloadedCommand = null;
+        }
+
+        /// <summary>
+        /// Retrieves all commands defined in the ViewModel.
+        /// </summary>
+        /// <returns>A list of tuples containing property names and their corresponding <see cref="ICommand"/> instances.</returns>
+        protected IReadOnlyList<(string PropertyName, ICommand? Command)> GetAllCommands()
+        {
+            scoped var commandBuilder = new ValueListBuilder<(string PropertyName, ICommand? Command)>([default, default, default, default, default, default, default, default]);
+            GetAllCommands(ref commandBuilder);
+            return commandBuilder.ToArray();
+        }
+
+        /// <summary>
+        /// Retrieves all non-null asynchronous commands defined in the ViewModel.
+        /// </summary>
+        /// <returns>A list of tuples containing property names and their corresponding <see cref="IAsyncCommand"/> instances.</returns>
+        protected IReadOnlyList<(string PropertyName, IAsyncCommand Command)> GetAllAsyncCommands()
+        {
+            scoped var commandBuilder = new ValueListBuilder<(string PropertyName, ICommand? Command)>([default, default, default, default, default, default, default, default]);
+            GetAllCommands(ref commandBuilder);
+
+            scoped var asyncCommandBuilder = new ValueListBuilder<(string PropertyName, IAsyncCommand Command)>([default, default, default, default, default, default, default, default]);
+            foreach (var (name, command) in commandBuilder.AsSpan())
+            {
+                if (command is IAsyncCommand asyncCommand)
+                {
+                    asyncCommandBuilder.Append((name, asyncCommand));
+                }
             }
-            Debug.Assert(command is { IsExecuting: true, CancellationTokenSource: { } } or { IsExecuting: false, CancellationTokenSource: null });
-            return command;
+            commandBuilder.Dispose();
+
+            return asyncCommandBuilder.ToArray();
         }
 
         /// <summary>
         /// Gets the cancellation token for the currently executing asynchronous command associated with the calling method's name.
         /// </summary>
-        /// <param name="callerName">The name of the calling method (automatically provided).</param>
+        /// <param name="callerName">The name of the calling method. This parameter is automatically provided by the compiler.</param>
         /// <returns>The <see cref="CancellationToken"/> for the ongoing asynchronous command, if any; otherwise, a default <see cref="CancellationToken"/>.</returns>
-        /// <exception cref="ArgumentException">Thrown when <paramref name="callerName"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="callerName"/> is null or empty, or command not found.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the command associated with the calling method is not asynchronous, is not executing, or does not have a valid cancellation token.</exception>
+        /// <remarks>
+        /// This method uses the <see cref="CallerMemberNameAttribute"/> to determine the name of the calling method automatically,
+        /// making it easier to retrieve the appropriate cancellation token without explicitly passing the method name.
+        /// This method is intended to be called from within an asynchronous command method to obtain the associated cancellation token.
+        /// </remarks>
         protected CancellationToken GetCurrentCancellationToken([CallerMemberName] string? callerName = null)
         {
-            var command = GetAsyncCommand(callerName);
-            Debug.Assert(command is { IsExecuting: true, CancellationTokenSource.Token.CanBeCanceled: true });
-            return command?.CancellationTokenSource?.Token ?? default;
-        }
-
-        /// <summary>
-        /// Registers an asynchronous command internally with the specified method name.
-        /// Ensures that the command is properly managed and disposed of when no longer needed.
-        /// </summary>
-        /// <param name="methodName">The name of the method associated with the command.</param>
-        /// <param name="command">The asynchronous command to register.</param>
-        private void InternalRegisterAsyncCommand(string methodName, IAsyncCommand command)
-        {
-            Debug.Assert(!string.IsNullOrEmpty(methodName));
-            Throw.IfNullOrEmpty(methodName);
-            Lifetime.AddBracket(() => PropertyChanged += OnPropertyChanged, () => PropertyChanged -= OnPropertyChanged);
-
-            var result = _asyncCommands.TryAdd(methodName, command);
-            Debug.Assert(result, $"Command already registered for '{methodName}'");
-            Throw.InvalidOperationExceptionIf(!result, $"Command already registered for '{methodName}'");
-
-            void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+            var command = GetCurrentCommand(callerName);
+            Debug.Assert(command is IRelayCommand { IsExecuting: true});
+            IAsyncCommand? asyncCommand = command as IAsyncCommand;
+            if (asyncCommand is null || !asyncCommand.IsExecuting)
             {
-                Debug.Assert(ReferenceEquals(sender, this));
-                if (e.PropertyName == nameof(IsDisposing) && IsDisposing)
-                {
-                    command.Cancel();//Cancel active commands while disposing
-                    result = _asyncCommands.TryRemove(methodName, out var asyncCommand);
-                    Debug.Assert(result && asyncCommand == command);
-                    command = null!;
-                }
+                Throw.InvalidOperationException($"No running asynchronous command found for the calling method '{callerName}'");
             }
-        }
-
-        /// <summary>
-        /// Nullifies all command properties in the ViewModel.
-        /// This is useful for cleanup purposes before the ViewModel is disposed.
-        /// </summary>
-        private void NullifyCommands()
-        {
-            var commandProperties = GetType().GetAllPropertiesOfType<ICommand>(typeof(ControlViewModel), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            foreach (var prop in commandProperties)
-            {
-                if (prop.CanWrite == false)
-                {
-                    Debug.Assert(false);
-                    continue;
-                }
-                prop.SetValue(this, null);
-            }
+            Throw.InvalidOperationExceptionIf(asyncCommand.CancellationTokenSource is null, "The asynchronous command does not have a valid cancellation token.");
+            return asyncCommand.CancellationTokenSource.Token;
         }
 
         /// <summary>
@@ -163,135 +230,14 @@ namespace Minimal.Mvvm.Windows
         /// </summary>
         public void RaiseCanExecuteChanged()
         {
-            var commandProperties = GetType().GetAllPropertiesOfType<ICommand>(typeof(ControlViewModel), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            foreach (var prop in commandProperties)
+            CheckDisposed();
+            scoped var commandBuilder = new ValueListBuilder<(string PropertyName, ICommand? Command)>([default, default, default, default, default, default, default, default]);
+            GetAllCommands(ref commandBuilder);
+            foreach (var (_, command) in commandBuilder.AsSpan())
             {
-                if (prop.CanRead == false)
-                {
-                    Debug.Assert(false);
-                    continue;
-                }
-                var command = (ICommand?)prop.GetValue(this, null);
                 command?.RaiseCanExecuteChanged();
             }
-        }
-
-        /// <summary>
-        /// Registers an asynchronous command with the specified execute method and optional can-execute method.
-        /// </summary>
-        /// <param name="executeMethod">The asynchronous method to execute.</param>
-        /// <param name="canExecuteMethod">An optional method that determines whether the command can execute.</param>
-        /// <param name="continueOnCapturedContext">
-        /// A value indicating whether the current execution context should be captured and used to continue asynchronous operations in the ExecuteAsync method. The default value is true.
-        /// </param>
-        /// <returns>The registered asynchronous command.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="executeMethod"/> is null.</exception>
-        /// <exception cref="ObjectDisposedException">Thrown if the ViewModel has been disposed.</exception>
-        public IAsyncCommand RegisterAsyncCommand(Func<Task> executeMethod, Func<bool>? canExecuteMethod = null, bool continueOnCapturedContext = true)
-        {
-            Throw.IfNull(executeMethod);
-            CheckDisposed();
-            string methodName = executeMethod.Method.Name;
-            var command = new AsyncCommand(async () =>
-            {
-                try
-                {
-                    await executeMethod().ConfigureAwait(continueOnCapturedContext);
-                }
-                catch (Exception ex)
-                {
-                    OnError(ex, methodName);
-                }
-            }, canExecuteMethod)
-            { ContinueOnCapturedContext = continueOnCapturedContext };
-            InternalRegisterAsyncCommand(methodName, command);
-            return command;
-        }
-
-        /// <summary>
-        /// Registers an asynchronous command with the specified execute method and optional can-execute method.
-        /// </summary>
-        /// <typeparam name="T">The type of parameter passed to the execute and can-execute methods.</typeparam>
-        /// <param name="executeMethod">The asynchronous method to execute.</param>
-        /// <param name="canExecuteMethod">An optional method that determines whether the command can execute with the given parameter.</param>
-        /// <param name="continueOnCapturedContext">
-        /// A value indicating whether the current execution context should be captured and used to continue asynchronous operations in the ExecuteAsync method. The default value is true.
-        /// </param>
-        /// <returns>The registered asynchronous command.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="executeMethod"/> is null.</exception>
-        /// <exception cref="ObjectDisposedException">Thrown if the ViewModel has been disposed.</exception>
-        public IAsyncCommand<T> RegisterAsyncCommand<T>(Func<T, Task> executeMethod, Func<T, bool>? canExecuteMethod = null, bool continueOnCapturedContext = true)
-        {
-            Throw.IfNull(executeMethod);
-            CheckDisposed();
-            string methodName = executeMethod.Method.Name;
-            var command = new AsyncCommand<T>(async x =>
-            {
-                try
-                {
-                    await executeMethod(x).ConfigureAwait(continueOnCapturedContext);
-                }
-                catch (Exception ex)
-                {
-                    OnError(ex, methodName);
-                }
-            }, canExecuteMethod)
-            { ContinueOnCapturedContext = continueOnCapturedContext };
-            InternalRegisterAsyncCommand(methodName, command);
-            return command;
-        }
-
-        /// <summary>
-        /// Registers a synchronous command with the specified execute method and optional can-execute method.
-        /// </summary>
-        /// <param name="executeMethod">The method to execute when the command is invoked.</param>
-        /// <param name="canExecuteMethod">An optional method that determines whether the command can execute.</param>
-        /// <returns>The registered synchronous command.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="executeMethod"/> is null.</exception>
-        /// <exception cref="ObjectDisposedException">Thrown if the ViewModel has been disposed.</exception>
-        public ICommand RegisterCommand(Action executeMethod, Func<bool>? canExecuteMethod = null)
-        {
-            Throw.IfNull(executeMethod);
-            CheckDisposed();
-            string methodName = executeMethod.Method.Name;
-            return new RelayCommand(() =>
-            {
-                try
-                {
-                    executeMethod();
-                }
-                catch (Exception ex)
-                {
-                    OnError(ex, methodName);
-                }
-            }, canExecuteMethod);
-        }
-
-        /// <summary>
-        /// Registers a synchronous command with the specified execute method and optional can-execute method.
-        /// </summary>
-        /// <typeparam name="T">The type of parameter passed to the execute and can-execute methods.</typeparam>
-        /// <param name="executeMethod">The method to execute when the command is invoked.</param>
-        /// <param name="canExecuteMethod">An optional method that determines whether the command can execute with the given parameter.</param>
-        /// <returns>The registered synchronous command.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="executeMethod"/> is null.</exception>
-        /// <exception cref="ObjectDisposedException">Thrown if the ViewModel has been disposed.</exception>
-        public ICommand<T> RegisterCommand<T>(Action<T> executeMethod, Func<T, bool>? canExecuteMethod = null)
-        {
-            Throw.IfNull(executeMethod);
-            CheckDisposed();
-            string methodName = executeMethod.Method.Name;
-            return new RelayCommand<T>(x =>
-            {
-                try
-                {
-                    executeMethod(x);
-                }
-                catch (Exception ex)
-                {
-                    OnError(ex, methodName);
-                }
-            }, canExecuteMethod);
+            commandBuilder.Dispose();
         }
 
         /// <summary>
@@ -307,9 +253,34 @@ namespace Minimal.Mvvm.Windows
         /// </remarks>
         public async ValueTask WaitAsyncCommands(CancellationToken cancellationToken = default)
         {
-            var commands = _asyncCommands.Values;
-            if (commands.Count == 0) return;
-            await Task.WhenAll(commands.Where(command => command.IsExecuting).Select(command => command.WaitAsync(cancellationToken)));
+            CheckDisposed();
+
+            scoped var commandBuilder = new ValueListBuilder<(string PropertyName, ICommand? Command)>([default, default, default, default, default, default, default, default]);
+            GetAllCommands(ref commandBuilder);
+
+            scoped var taskBuilder = new ValueListBuilder<Task>([default, default, default, default, default, default, default, default]);
+            foreach (var (_, command) in commandBuilder.AsSpan())
+            {
+                if (command is IAsyncCommand { IsExecuting: true } asyncCommand)
+                {
+                    taskBuilder.Append(asyncCommand.WaitAsync(cancellationToken));
+                }
+            }
+            commandBuilder.Dispose();
+
+            if (taskBuilder.Length == 0)
+            {
+                taskBuilder.Dispose();
+                return;
+            }
+
+#if NET9_0_OR_GREATER
+            var task = Task.WhenAll(taskBuilder.AsSpan());
+            taskBuilder.Dispose();
+            await task.ConfigureAwait(false);
+#else
+            await Task.WhenAll(taskBuilder.ToArray()).ConfigureAwait(false);
+#endif
         }
 
         #endregion

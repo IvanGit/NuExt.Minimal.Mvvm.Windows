@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -186,11 +187,7 @@ namespace Minimal.Mvvm.Windows
 
         private string GetFileName()
         {
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(FileName);
-#else
-            Throw.IfNullOrEmpty(FileName);
-#endif
             if (Path.HasExtension(FileName)) return IOUtils.ClearFileName(FileName)!;
             return IOUtils.ClearFileName(FileName) + ".json";
         }

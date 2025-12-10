@@ -1,7 +1,12 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -442,7 +447,7 @@ namespace Minimal.Mvvm.Windows
             }
             if (tabControl.ItemsSource != null)
             {
-                throw new InvalidOperationException("Can't use not null ItemsSource in this service.");
+                Throw.InvalidOperationException("Can't use not null ItemsSource in this service.");
             }
             var lifetime = new Lifetime();
             if (tabControl.Items is INotifyCollectionChanged collection)

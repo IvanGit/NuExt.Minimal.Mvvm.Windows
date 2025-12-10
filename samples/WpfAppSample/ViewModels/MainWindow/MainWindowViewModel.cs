@@ -96,7 +96,9 @@ namespace MovieWpfApp.ViewModels
 
         protected override ValueTask<bool> CanCloseAsync(CancellationToken cancellationToken)
         {
-            MessageBoxResult result = MessageBox.Show(
+            VerifyAccess();
+
+            MessageBoxResult result = MessageBox.Show(WindowService?.Window,
                 string.Format(Loc.Are_you_sure_you_want_to_close__Arg0__, $"{AssemblyInfo.Current.Product}"),
                 Loc.Confirmation,
                 MessageBoxButton.YesNo,
@@ -155,8 +157,15 @@ namespace MovieWpfApp.ViewModels
 
         protected override void OnError(Exception ex, [CallerMemberName] string? callerName = null)
         {
-            base.OnError(ex, callerName);
-            MessageBox.Show(string.Format(Loc.An_error_has_occurred_in_Arg0_Arg1, callerName, ex.Message), Loc.Error, MessageBoxButton.OK, MessageBoxImage.Error);
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.Invoke(new Action<Exception, string?>(OnError), ex, callerName);
+                return;
+            }
+
+            VerifyAccess();
+
+            MessageBox.Show(WindowService?.Window, string.Format(Loc.An_error_has_occurred_in_Arg0_Arg1, callerName, ex.Message), Loc.Error, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         protected override Task OnInitializeAsync(CancellationToken cancellationToken)

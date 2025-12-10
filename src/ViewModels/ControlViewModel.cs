@@ -1,6 +1,9 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Minimal.Mvvm.Windows
 {
@@ -80,9 +83,16 @@ namespace Minimal.Mvvm.Windows
 
         private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(IsInitialized))//handle only IsInitialized
+            Debug.Assert(ReferenceEquals(sender, this));
+
+            switch (e.PropertyName)
             {
-                OnPropertyChanged(EventArgsCache.IsUsablePropertyChanged);
+                case nameof(IsInitialized):
+                    OnPropertyChanged(EventArgsCache.IsUsablePropertyChanged);
+                    break;
+                case nameof(IsDisposing) when IsDisposing:
+                    CancelAsyncCommands();
+                    break;
             }
         }
 
@@ -101,7 +111,7 @@ namespace Minimal.Mvvm.Windows
                 var message = $"{GetType().FullName} ({DisplayName ?? "Unnamed"}) ({GetHashCode()}) has been disposed.";
                 Trace.WriteLine(message);
                 Debug.Fail(message);
-                throw new ObjectDisposedException(GetType().FullName, message);
+                Throw.ObjectDisposedException(this, message);
             }
         }
 
@@ -124,7 +134,8 @@ namespace Minimal.Mvvm.Windows
             }
             catch (Exception ex)
             {
-                Debug.Assert(false, $"{GetType().FullName} ({DisplayName ?? "Unnamed"}) ({GetHashCode()}):{Environment.NewLine}{ex.Message}");
+                Trace.WriteLine($"{GetType().FullName} ({DisplayName ?? "Unnamed"}) ({GetHashCode()}):{Environment.NewLine}{ex.Message}");
+                Debug.Fail($"{GetType().FullName} ({DisplayName ?? "Unnamed"}) ({GetHashCode()}):{Environment.NewLine}{ex.Message}");
                 throw;
             }
             finally
@@ -150,7 +161,6 @@ namespace Minimal.Mvvm.Windows
         /// <param name="callerName">The name of the calling method (automatically provided).</param>
         protected virtual void OnError(Exception ex, [CallerMemberName] string? callerName = null)
         {
-            Debug.Assert(CheckAccess());
             Trace.WriteLine($"An error has occurred in {callerName}:{Environment.NewLine}{ex.Message}");
         }
 

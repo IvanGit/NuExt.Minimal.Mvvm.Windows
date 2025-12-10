@@ -1,4 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
@@ -76,11 +78,7 @@ namespace Minimal.Mvvm
         public Type? GetPropertyType(string propertyName)
         {
             Debug.Assert(!string.IsNullOrEmpty(propertyName), "propertyName is null or empty");
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(propertyName);
-#else
-            Throw.IfNullOrEmpty(propertyName);
-#endif
             Debug.Assert(GetProperties().ContainsKey(propertyName), $"propertyName '{propertyName}' is not defined");
             return GetProperties().TryGetValue(propertyName, out var pi) ? pi.PropertyType : null;
         }
@@ -133,12 +131,7 @@ namespace Minimal.Mvvm
         public bool SetProperty(string propertyName, object? value)
         {
             Debug.Assert(!string.IsNullOrEmpty(propertyName), "propertyName is null or empty");
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(propertyName);
-#else
-            Throw.IfNullOrEmpty(propertyName);
-#endif
-
             Debug.Assert(GetProperties().ContainsKey(propertyName), $"propertyName '{propertyName}' is not defined");
             if (!GetProperties().TryGetValue(propertyName, out var pi) || !pi.CanWrite)
             {

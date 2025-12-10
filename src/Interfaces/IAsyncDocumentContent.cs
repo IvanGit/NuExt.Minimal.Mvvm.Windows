@@ -1,4 +1,7 @@
-﻿namespace Minimal.Mvvm.Windows
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace Minimal.Mvvm.Windows
 {
     /// <summary>
     /// Defines an interface for asynchronous document content that can represent a view model.

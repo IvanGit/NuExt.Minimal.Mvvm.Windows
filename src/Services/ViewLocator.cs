@@ -1,4 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 
@@ -122,8 +124,9 @@ namespace Minimal.Mvvm.Windows
         /// <exception cref="ArgumentNullException">Thrown if the name or type is null.</exception>
         public void RegisterType(string name, Type type)
         {
-            Throw.IfNullOrEmpty(name);
-            Throw.IfNull(type);
+            ArgumentException.ThrowIfNullOrEmpty(name);
+            ArgumentNullException.ThrowIfNull(type);
+
             _registeredTypes[name] = type;
         }
 
@@ -135,7 +138,8 @@ namespace Minimal.Mvvm.Windows
         /// <exception cref="ArgumentNullException">Thrown if the name is null or empty.</exception>
         public bool UnregisterType(string name)
         {
-            Throw.IfNullOrEmpty(name);
+            ArgumentException.ThrowIfNullOrEmpty(name);
+
             return _registeredTypes.TryRemove(name, out _);
         }
 

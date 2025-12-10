@@ -1,4 +1,7 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Windows.Input;
 
 namespace Minimal.Mvvm
@@ -13,7 +16,7 @@ namespace Minimal.Mvvm
         /// </summary>
         /// <param name="viewModel">ViewModel.</param>
         /// <returns>A list of tuples containing command names and their corresponding <see cref="ICommand"/> instances.</returns>
-        public static IList<(string PropertyName, ICommand? Command)> GetAllCommands<T>(this T viewModel) where T : ViewModelBase
+        public static IList<(string PropertyName, ICommand? Command)> GetAllCommands<T>(this T viewModel) where T : BindableBase
         {
             var commandProperties = viewModel.GetType()
                 .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)

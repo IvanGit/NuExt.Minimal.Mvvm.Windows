@@ -1,4 +1,7 @@
-﻿namespace Minimal.Mvvm.Windows
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace Minimal.Mvvm.Windows
 {
     /// <summary>
     /// Provides a base class for view models that represent document content. 

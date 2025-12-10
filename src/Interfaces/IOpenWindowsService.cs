@@ -1,4 +1,7 @@
-﻿namespace Minimal.Mvvm.Windows
+﻿using System;
+using System.Collections.Generic;
+
+namespace Minimal.Mvvm.Windows
 {
     /// <summary>
     /// Interface providing methods to manage open windows in the application.

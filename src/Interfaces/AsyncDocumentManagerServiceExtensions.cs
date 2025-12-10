@@ -1,4 +1,8 @@
-﻿namespace Minimal.Mvvm.Windows
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Minimal.Mvvm.Windows
 {
     /// <summary>
     /// Provides extension methods for the <see cref="IAsyncDocumentManagerService"/>.

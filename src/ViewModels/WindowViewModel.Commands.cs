@@ -1,5 +1,10 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using static AccessModifier;
 
@@ -12,30 +17,69 @@ namespace Minimal.Mvvm.Windows
         /// <summary>
         /// Gets or sets the command that is executed when the content is rendered.
         /// </summary>
+        /// <remarks>
+        /// This command should be bound to the window in the view to handle the ContentRendered event. For example:
+        /// <code>
+        /// &lt;minimal:EventTrigger EventName="ContentRendered" Command="{Binding ContentRenderedCommand}" /&gt;
+        /// </code>
+        /// The command allows you to perform actions such as initial data loading in the <see cref="ContentRenderedAsync"/> method after the window's content has been fully rendered.
+        /// </remarks>
         [Notify(Setter = Private)]
         private ICommand? _contentRenderedCommand;
 
         /// <summary>
         /// Gets or sets the command that is executed to close the window.
         /// </summary>
+        /// <remarks>
+        /// This command can be bound to a control in the view to handle the window closing action. For example:
+        /// <code>
+        /// &lt;Button Content="Close" Command="{Binding CloseCommand}" /&gt;
+        /// </code>
+        /// </remarks>
         [Notify(Setter = Private)]
         private ICommand? _closeCommand;
 
         /// <summary>
         /// Gets or sets the command that is executed during the closing event of the window.
         /// </summary>
+        /// <remarks>
+        /// This command should be bound to a window in the view to handle the window's Closing event. For example:
+        /// <code>
+        /// &lt;minimal:EventTrigger EventName="Closing" Command="{Binding ClosingCommand}" PassEventArgsToCommand="True" /&gt;
+        /// </code>
+        /// The command allows you to manage cancellation in the <see cref="CanCloseAsync"/> method and perform cleanup operations in the <see cref="ControlViewModel.OnDisposeAsync"/> method when the window is closing.
+        /// Note that <c>PassEventArgsToCommand</c> must be specified and set to <c>True</c> to pass the <see cref="System.ComponentModel.CancelEventArgs"/> to the command.
+        /// </remarks>
         [Notify(Setter = Private)]
         private ICommand? _closingCommand;
 
         /// <summary>
         /// Gets or sets the command that is executed after the window placement has been restored.
         /// </summary>
+        /// <remarks>
+        /// This command should be bound to the <see cref="Minimal.Mvvm.Windows.WindowPlacementService"/> in the view to handle actions after the window's placement has been restored. For example:
+        /// <code>
+        /// &lt;minimal:WindowPlacementService FileName="MainWindow" 
+        ///                                  DirectoryName="{Binding EnvironmentService.SettingsDirectory, FallbackValue={x:Null}}"
+        ///                                  PlacementRestoredCommand="{Binding PlacementRestoredCommand}" 
+        ///                                  PlacementSavedCommand="{Binding PlacementSavedCommand}"/&gt;
+        /// </code>
+        /// </remarks>
         [Notify(Setter = Private)]
         private ICommand? _placementRestoredCommand;
 
         /// <summary>
         /// Gets or sets the command that is executed after the window placement has been saved.
         /// </summary>
+        /// <remarks>
+        /// This command should be bound to the <see cref="Minimal.Mvvm.Windows.WindowPlacementService"/> in the view to handle actions after the window's placement has been saved. For example:
+        /// <code>
+        /// &lt;minimal:WindowPlacementService FileName="MainWindow" 
+        ///                                  DirectoryName="{Binding EnvironmentService.SettingsDirectory, FallbackValue={x:Null}}"
+        ///                                  PlacementRestoredCommand="{Binding PlacementRestoredCommand}" 
+        ///                                  PlacementSavedCommand="{Binding PlacementSavedCommand}"/&gt;
+        /// </code>
+        /// </remarks>
         [Notify(Setter = Private)]
         private ICommand? _placementSavedCommand;
 
@@ -50,7 +94,7 @@ namespace Minimal.Mvvm.Windows
         {
             try
             {
-                await OnContentRenderedAsync(CancellationTokenSource.Token);
+                await OnContentRenderedAsync(CancellationTokenSource.Token).ConfigureAwait(false);
             }
             catch (OperationCanceledException ex)
             {
@@ -126,11 +170,49 @@ namespace Minimal.Mvvm.Windows
         {
             base.CreateCommands();
 
-            ContentRenderedCommand = RegisterAsyncCommand(ContentRenderedAsync);
-            CloseCommand = RegisterCommand(Close);
-            ClosingCommand = RegisterCommand<CancelEventArgs>(Closing);
-            PlacementRestoredCommand = RegisterCommand(OnPlacementRestored);
-            PlacementSavedCommand = RegisterCommand(OnPlacementSaved);
+            ContentRenderedCommand = new AsyncCommand(ContentRenderedAsync);
+            CloseCommand = new RelayCommand(Close);
+            ClosingCommand = new RelayCommand<CancelEventArgs>(Closing);
+            PlacementRestoredCommand = new RelayCommand(OnPlacementRestored);
+            PlacementSavedCommand = new RelayCommand(OnPlacementSaved);
+        }
+
+        /// <inheritdoc />
+        protected override ICommand? GetCurrentCommand([CallerMemberName] string? callerName = null)
+        {
+            return callerName switch
+            {
+                nameof(ContentRenderedAsync) => ContentRenderedCommand,
+                nameof(Close) => CloseCommand,
+                nameof(Closing) => ClosingCommand,
+                nameof(OnPlacementRestored) => PlacementRestoredCommand,
+                nameof(OnPlacementSaved) => PlacementSavedCommand,
+                _ => base.GetCurrentCommand(callerName)
+            };
+        }
+
+        /// <inheritdoc />
+        protected override void GetAllCommands(ref ValueListBuilder<(string PropertyName, ICommand? Command)> builder)
+        {
+            base.GetAllCommands(ref builder);
+
+            builder.Append((nameof(ContentRenderedCommand), ContentRenderedCommand));
+            builder.Append((nameof(CloseCommand), CloseCommand));
+            builder.Append((nameof(ClosingCommand), ClosingCommand));
+            builder.Append((nameof(PlacementRestoredCommand), PlacementRestoredCommand));
+            builder.Append((nameof(PlacementSavedCommand), PlacementSavedCommand));
+        }
+
+        /// <inheritdoc />
+        protected override void NullifyCommands()
+        {
+            ContentRenderedCommand = null;
+            CloseCommand = null;
+            ClosingCommand = null;
+            PlacementRestoredCommand = null;
+            PlacementSavedCommand = null;
+
+            base.NullifyCommands();
         }
 
         /// <summary>
@@ -139,6 +221,13 @@ namespace Minimal.Mvvm.Windows
         /// </summary>
         /// <param name="cancellationToken">A token for cancelling the operation.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
+        /// <remarks>
+        /// The ContentRenderedCommand should be bound to the window in the view to handle the ContentRendered event. For example:
+        /// <code>
+        /// &lt;minimal:EventTrigger EventName="ContentRendered" Command="{Binding ContentRenderedCommand}" /&gt;
+        /// </code>
+        /// The command allows you to perform actions such as initial data loading in the <see cref="ContentRenderedAsync"/> method after the window's content has been fully rendered.
+        /// </remarks>
         protected virtual ValueTask OnContentRenderedAsync(CancellationToken cancellationToken)
         {
             Debug.Assert(WindowService != null, $"{nameof(WindowService)} is null");

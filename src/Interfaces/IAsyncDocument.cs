@@ -1,4 +1,7 @@
-﻿namespace Minimal.Mvvm.Windows
+﻿using System;
+using System.Threading.Tasks;
+
+namespace Minimal.Mvvm.Windows
 {
     /// <summary>
     /// Defines an interface for an asynchronous document.
