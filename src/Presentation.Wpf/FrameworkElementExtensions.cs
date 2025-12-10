@@ -21,11 +21,8 @@
         /// </remarks>
         public static async Task WaitLoadedAsync(this FrameworkElement element, CancellationToken cancellationToken)
         {
-#if NET
             ArgumentNullException.ThrowIfNull(element);
-#else
-            Throw.IfNull(element);
-#endif
+
             element.Dispatcher.VerifyAccess();
 
             if (element.IsLoaded)

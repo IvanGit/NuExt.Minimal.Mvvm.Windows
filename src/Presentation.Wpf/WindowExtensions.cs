@@ -27,11 +27,8 @@ namespace System.Windows
         /// <exception cref="ArgumentNullException">Thrown when the window is null.</exception>
         public static void BringToFront(this Window window)
         {
-#if NET
             ArgumentNullException.ThrowIfNull(window);
-#else
-            Throw.IfNull(window);
-#endif
+
             if (window.WindowState == WindowState.Minimized)
             {
                 window.WindowState = WindowState.Normal;
@@ -54,11 +51,8 @@ namespace System.Windows
         /// or <c>null</c> if the operation fails.</returns>
         public static WindowPlacement? GetPlacement(this Window window)
         {
-#if NET
             ArgumentNullException.ThrowIfNull(window);
-#else
-            Throw.IfNull(window);
-#endif
+
             var windowPlacement = WindowPlacement.GetPlacement(new WindowInteropHelper(window).Handle);
             if (windowPlacement != null)
             {
@@ -92,11 +86,8 @@ namespace System.Windows
         /// <returns><c>true</c> if the operation is successful, otherwise <c>false</c>.</returns>
         public static bool SetPlacement(this Window window, WindowPlacement? windowPlacement)
         {
-#if NET
             ArgumentNullException.ThrowIfNull(window);
-#else
-            Throw.IfNull(window);
-#endif
+
             if (windowPlacement is null)
             {
                 return false;

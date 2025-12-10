@@ -18,11 +18,8 @@ namespace System.Windows.Controls
         /// </summary>
         public static void BringIntoView(this VirtualizingStackPanel virtualizingPanel, int index)
         {
-#if NET
             ArgumentNullException.ThrowIfNull(virtualizingPanel);
-#else
-            Throw.IfNull(virtualizingPanel);
-#endif
+
             var mi = s_bringIndexIntoViewMethods.GetOrAdd(virtualizingPanel.GetType(), type => virtualizingPanel.GetType().GetMethod("BringIndexIntoView",
                 BindingFlags.NonPublic | BindingFlags.Instance));
             Debug.Assert(mi != null);
