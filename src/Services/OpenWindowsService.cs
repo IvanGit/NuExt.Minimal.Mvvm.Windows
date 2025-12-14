@@ -16,6 +16,7 @@ namespace Minimal.Mvvm.Windows
     {
         private readonly List<WindowViewModel> _viewModels = [];
         private readonly AsyncLock _lock = new();
+        private bool _disposing;
 
         /// <summary>
         /// Gets open window view models.
@@ -32,6 +33,7 @@ namespace Minimal.Mvvm.Windows
             {
                 return;
             }
+            _disposing = true;
             await _lock.EnterAsync();
             try
             {
@@ -58,6 +60,7 @@ namespace Minimal.Mvvm.Windows
             finally
             {
                 _lock.Exit();
+                _disposing = false;
             }
             _lock.Dispose();
         }
@@ -85,7 +88,7 @@ namespace Minimal.Mvvm.Windows
         /// <param name="viewModel">The window view model to unregister.</param>
         public void Unregister(WindowViewModel viewModel)
         {
-            if (_lock.IsEntered)//is disposing
+            if (_disposing)
             {
                 return;
             }

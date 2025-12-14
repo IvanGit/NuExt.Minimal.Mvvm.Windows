@@ -76,7 +76,7 @@ namespace Minimal.Mvvm.Windows
             Debug.Assert(sender is ComboBox);
             if (sender is ComboBox comboBox)
             {
-                Dispatcher.InvokeAsync(() => SetSelectedItems(comboBox, SelectedItems));
+                comboBox.Dispatcher.InvokeAsync(() => SetSelectedItems(comboBox, SelectedItems));
             }
         }
 

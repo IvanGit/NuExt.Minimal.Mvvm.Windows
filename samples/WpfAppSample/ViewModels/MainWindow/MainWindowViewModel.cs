@@ -157,9 +157,9 @@ namespace MovieWpfApp.ViewModels
 
         protected override void OnError(Exception ex, [CallerMemberName] string? callerName = null)
         {
-            if (!Dispatcher.CheckAccess())
+            if (!CheckAccess())
             {
-                Dispatcher.Invoke(new Action<Exception, string?>(OnError), ex, callerName);
+                Invoke(() => OnError(ex, callerName));
                 return;
             }
 

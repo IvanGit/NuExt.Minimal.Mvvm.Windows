@@ -25,9 +25,10 @@ namespace Minimal.Mvvm.Windows
         private class WindowedDocument : AsyncDisposable, IAsyncDocument
         {
             private readonly AsyncLifetime _lifetime = new(continueOnCapturedContext: true);
-            private bool _isClosing;
+            private volatile bool _isClosing;
 
             public WindowedDocument(WindowedDocumentService owner, Window window)
+                 : base(continueOnCapturedContext: true)
             {
                 Owner = owner ?? throw new ArgumentNullException(nameof(owner));
                 Window = window ?? throw new ArgumentNullException(nameof(window));
@@ -104,21 +105,23 @@ namespace Minimal.Mvvm.Windows
 
             private void OnWindowClosing(object? sender, CancelEventArgs e)
             {
+                Debug.Assert(sender == Window);
                 Debug.Assert(GetDocument((Window)sender!) == this);
+
                 if (e.Cancel || _isClosing)
                 {
                     return;
                 }
 
                 e.Cancel = true;
-                Window.Dispatcher.InvokeAsync(async () => await CloseWindowAsync(Window, CancellationTokenSource.Token));
+                Window.Dispatcher.InvokeAsync(async () => await CloseWindowAsync(this, CancellationTokenSource.Token));
             }
 
-            private static async ValueTask CloseWindowAsync(Window window, CancellationToken cancellationToken)
+            private static async ValueTask CloseWindowAsync(WindowedDocument document, CancellationToken cancellationToken)
             {
                 try
                 {
-                    var viewModel = ViewModelHelper.GetViewModelFromView(window.Content);
+                    var viewModel = ViewModelHelper.GetViewModelFromView(document.Window.Content);
                     Debug.Assert(viewModel is IAsyncDocumentContent);
                     if (viewModel is IAsyncDocumentContent documentContent && await documentContent.CanCloseAsync(cancellationToken) == false)
                     {
@@ -131,24 +134,13 @@ namespace Minimal.Mvvm.Windows
                     //do nothing
                 }
 
-                var document = GetDocument(window);
-                if (document?.HideInsteadOfClose == true)
+                if (document.HideInsteadOfClose)
                 {
                     document.Hide();
                     return;
                 }
-                if (document != null)
-                {
-                    await document.CloseAsync(force: true).ConfigureAwait(false);
-                    return;
-                }
-                Debug.Assert(window.DataContext == null);//viewModel is disposed
-                if (window.Dispatcher.CheckAccess())
-                {
-                    window.Close();
-                    return;
-                }
-                await window.Dispatcher.InvokeAsync(window.Close);
+
+                await document.CloseAsync(force: true).ConfigureAwait(false);
             }
 
             private void OnWindowDeactivated(object? sender, EventArgs e)
@@ -247,8 +239,9 @@ namespace Minimal.Mvvm.Windows
                 Window.Hide();
             }
 
-            protected override ValueTask OnDisposeAsync()
+            protected override ValueTask DisposeAsyncCore()
             {
+                Debug.Assert(ContinueOnCapturedContext);
                 return _lifetime.DisposeAsync();
             }
 
