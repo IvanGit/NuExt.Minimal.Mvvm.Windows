@@ -15,7 +15,8 @@ namespace Minimal.Mvvm.Windows
         private static ViewLocatorBase? s_custom;
 
         private readonly ConcurrentDictionary<string, Type> _registeredTypes = new();
-        private readonly ConcurrentDictionary<string, Type> _cachedTypes = new();
+        private readonly ConcurrentDictionary<string, Type> _nameCache = new();
+        private readonly ConcurrentDictionary<string, Type> _fullNameCache = new();
 
         #region Properties
 
@@ -42,7 +43,8 @@ namespace Minimal.Mvvm.Windows
         /// </summary>
         public void ClearCache()
         {
-            _cachedTypes.Clear();
+            _nameCache.Clear();
+            _fullNameCache.Clear();
         }
 
         /// <summary>
@@ -65,55 +67,179 @@ namespace Minimal.Mvvm.Windows
             {
                 return null;
             }
+
             if (_registeredTypes.TryGetValue(viewName!, out var registeredType))
             {
                 return registeredType;
             }
-            if (_cachedTypes.TryGetValue(viewName!, out var cachedType))
+            if (_nameCache.TryGetValue(viewName!, out var byName))
             {
-                return cachedType;
+                return byName;
             }
+            if (_fullNameCache.TryGetValue(viewName!, out var byFullName))
+            {
+                return byFullName;
+            }
+
             foreach (var type in GetTypes())
             {
                 Debug.Assert(type != null);
                 if (type!.Name == viewName)
                 {
-                    return (_cachedTypes[type.Name] = type);
+                    return (_nameCache[type.Name] = type);
                 }
                 if (type.FullName == viewName)
                 {
-                    return (_cachedTypes[type.FullName] = type);
+                    return (_fullNameCache[type.FullName] = type);
                 }
             }
             return null;
         }
 
         /// <summary>
-        /// Gets all types from the assemblies specified by <see cref="Assemblies"/>.
+        /// Gets types from the assemblies specified by <see cref="Assemblies"/>.
         /// </summary>
         /// <returns>An enumerable collection of types.</returns>
         protected virtual IEnumerable<Type> GetTypes()
         {
+            var entryAssembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+            var processedAssemblies = new HashSet<Assembly>() { entryAssembly };
+
+            // 1. Entry assembly first (most likely to contain views)
+            foreach (var type in GetAssemblyTypes(entryAssembly))
+            {
+                yield return type;
+            }
+
+            // 2. Other assemblies
             foreach (Assembly assembly in Assemblies)
             {
-                Type?[] types;
-                try
+                if (!processedAssemblies.Add(assembly))
                 {
-                    types = assembly.GetTypes();
+                    continue;
                 }
-                catch (ReflectionTypeLoadException ex)
+                if (ShouldSkipAssembly(assembly))
                 {
-                    types = ex.Types;
+                    continue;
                 }
-                foreach (var type in types)
+
+                foreach (var type in GetAssemblyTypes(assembly))
                 {
-                    if (type == null)
-                    {
-                        continue;
-                    }
                     yield return type;
                 }
             }
+
+            static Type[] GetAssemblyTypes(Assembly assembly)
+            {
+                var builder = new ValueListBuilder<Type>(128);
+                Type?[] assemblyTypes;
+                try
+                {
+                    assemblyTypes = assembly.GetTypes();
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    assemblyTypes = ex.Types;
+                }
+                foreach (var type in assemblyTypes)
+                {
+                    if (type == null || ShouldSkipType(type))
+                    {
+                        continue;
+                    }
+                    builder.Append(type);
+                }
+                Debug.Assert(builder.Length < 256, $"builder.Length: {builder.Length}. Encrease capacity.");
+                return builder.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Determines whether to skip the specified type.
+        /// </summary>
+        private static bool ShouldSkipType(Type type)
+        {
+            // Skip abstract, interface, generic type definitions types and enums with ValueType (not Views)
+            if (type.IsAbstract || type.IsInterface || type.IsGenericTypeDefinition || type.IsValueType)
+            {
+                return true;
+            }
+
+            // Skip anonymous && compiler-generated types
+            var typeName = type.Name;
+            if (typeName.Length >= 2 && typeName[0] == '<' && typeName.IndexOf('>') > 0)
+            {
+                return true;
+            }
+
+            // Skip types in system namespaces (even in user assemblies)
+            var typeNamespace = type.Namespace;
+            if (typeNamespace != null &&
+               (typeNamespace.StartsWith("System.", StringComparison.Ordinal) ||
+                typeNamespace.StartsWith("Microsoft.", StringComparison.Ordinal) ||
+                typeNamespace.StartsWith("Windows.", StringComparison.Ordinal)))
+            {
+                return true;
+            }
+
+            // Skip delegates, attributes. etc. (not Views)
+            var baseTypeFullName = type.BaseType?.FullName;
+            if (baseTypeFullName != null && (baseTypeFullName == "System.Delegate" ||
+                                            baseTypeFullName == "System.MulticastDelegate" ||
+                                            baseTypeFullName == "System.Attribute" ||
+                                            baseTypeFullName == "System.Object" ||
+                                            baseTypeFullName == "System.EventArgs" ||
+                                            baseTypeFullName == "System.Exception"))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether to skip loading types from the specified assembly.
+        /// </summary>
+        private static bool ShouldSkipAssembly(Assembly assembly)
+        {
+            if (assembly.IsDynamic)
+                return true;
+
+            var fullName = assembly.FullName;
+            if (fullName == null)
+                return true;
+
+            var assemblyName = fullName.Split(',')[0];
+
+            // System assemblies
+            if (assemblyName.StartsWith("System.", StringComparison.Ordinal) ||
+                assemblyName.StartsWith("Microsoft.", StringComparison.Ordinal) ||
+                assemblyName.StartsWith("Windows.", StringComparison.Ordinal) ||
+                assemblyName.StartsWith("WindowsBase", StringComparison.Ordinal) ||
+                assemblyName.StartsWith("WindowsForms", StringComparison.Ordinal) ||
+                assemblyName.StartsWith("Presentation", StringComparison.Ordinal) ||
+                assemblyName.StartsWith("mscorlib", StringComparison.Ordinal) ||
+                assemblyName.StartsWith("netstandard", StringComparison.Ordinal) ||
+                assemblyName.StartsWith("Accessibility", StringComparison.Ordinal) ||
+                assemblyName.StartsWith("UIAutomation", StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            // Add more known assemblies that don't contain Views
+            if (assemblyName.StartsWith("Newtonsoft.", StringComparison.Ordinal) ||
+                assemblyName.StartsWith("NLog", StringComparison.Ordinal) ||
+                assemblyName.StartsWith("log4net", StringComparison.Ordinal) ||
+                assemblyName.StartsWith("Serilog", StringComparison.Ordinal) ||
+                assemblyName.StartsWith("AutoMapper", StringComparison.Ordinal) ||
+                assemblyName.StartsWith("EntityFramework", StringComparison.Ordinal) ||
+                assemblyName.StartsWith("Dapper", StringComparison.Ordinal) ||
+                assemblyName.StartsWith("NuExt.", StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>

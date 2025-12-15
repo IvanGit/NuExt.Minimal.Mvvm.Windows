@@ -93,15 +93,14 @@ namespace Minimal.Mvvm.Windows
         #region Event Handlers
 
         /// <inheritdoc />
-        protected override void OnWindowChanged(Window? oldWindow)
+        protected override void OnWindowChanged(Window? oldWindow, Window? newWindow)
         {
-            base.OnWindowChanged(oldWindow);
+            base.OnWindowChanged(oldWindow, newWindow);
             if (oldWindow != null)
             {
                 oldWindow.Closing -= OnClosing;
                 oldWindow.SourceInitialized -= OnSourceInitialized;
             }
-            var newWindow = Window;
             if (newWindow != null)
             {
                 newWindow.SourceInitialized += OnSourceInitialized;

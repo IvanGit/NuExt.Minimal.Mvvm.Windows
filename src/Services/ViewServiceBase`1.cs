@@ -7,6 +7,7 @@ namespace Minimal.Mvvm.Windows
 {
     /// <summary>
     /// An abstract base class that provides services related to views in an MVVM framework.
+    /// Provides view creation, template selection, and locator services for view models.
     /// </summary>
     /// <typeparam name="T">The type of the framework element that this service will manage.</typeparam>
     public abstract class ViewServiceBase<T> : ServiceBase<T> where T : FrameworkElement
@@ -41,6 +42,9 @@ namespace Minimal.Mvvm.Windows
         /// <summary>
         /// Gets or sets the view locator used to locate views for the view models.
         /// </summary>
+        /// <value>
+        /// The view locator instance, or <see langword="null"/> to use the default locator.
+        /// </value>
         public ViewLocatorBase? ViewLocator
         {
             get => (ViewLocatorBase?)GetValue(ViewLocatorProperty);
@@ -109,8 +113,12 @@ namespace Minimal.Mvvm.Windows
         /// <param name="documentType">The type of document to create the view for.</param>
         /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the created view object.</returns>
-        protected ValueTask<object?> CreateViewAsync(string? documentType, CancellationToken cancellationToken)
+        protected virtual ValueTask<object?> CreateViewAsync(string? documentType, CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return new ValueTask<object?>(Task.FromCanceled<object?>(cancellationToken));
+            }
             return GetViewLocator().CreateViewAsync(documentType, ViewTemplate, ViewTemplateSelector, cancellationToken);
         }
 

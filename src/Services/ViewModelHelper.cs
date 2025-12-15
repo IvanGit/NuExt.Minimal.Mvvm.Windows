@@ -10,8 +10,6 @@ namespace Minimal.Mvvm.Windows
 {
     /// <summary>
     /// Provides helper methods for managing the relationship between views and view models,
-    /// including attaching and detaching view models to views, retrieving properties from view models,
-    /// and setting or clearing bindings for view model properties on views.
     /// </summary>
     public static class ViewModelHelper
     {
@@ -89,9 +87,16 @@ namespace Minimal.Mvvm.Windows
         /// <param name="parameter">Additional parameter for initializing the view.</param>
         /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public static async ValueTask InitializeViewAsync(object? view, object? viewModel, object? parentViewModel, object? parameter, CancellationToken cancellationToken)
+        public static ValueTask InitializeViewAsync(object? view, object? viewModel, object? parentViewModel, object? parameter, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            if (cancellationToken.IsCancellationRequested)
+            {
+#if NET
+                return ValueTask.FromCanceled(cancellationToken);
+#else
+                return new ValueTask(Task.FromCanceled(cancellationToken));
+#endif
+            }
             // First, initialize parameters before data context is set
             if (viewModel is ViewModelBase viewModelBase)
             {
@@ -103,8 +108,9 @@ namespace Minimal.Mvvm.Windows
             // Third, initialize the view model asynchronously if it has not been initialized yet
             if (viewModel is ViewModelBase { IsInitialized: false } initializable)
             {
-                await initializable.InitializeAsync(cancellationToken).ConfigureAwait(false);
+                return new ValueTask(initializable.InitializeAsync(cancellationToken));
             }
+            return ValueTask.CompletedTask;
         }
 
         /// <summary>

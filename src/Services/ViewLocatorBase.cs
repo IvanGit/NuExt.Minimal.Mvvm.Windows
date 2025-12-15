@@ -23,18 +23,27 @@ namespace Minimal.Mvvm.Windows
         /// <param name="viewTemplateSelector">The data template selector used to select the appropriate data template.</param>
         /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the created view object.</returns>
-        public virtual async ValueTask<object?> CreateViewAsync(string? documentType, DataTemplate? viewTemplate, DataTemplateSelector? viewTemplateSelector, CancellationToken cancellationToken)
+        public virtual ValueTask<object?> CreateViewAsync(string? documentType, DataTemplate? viewTemplate, DataTemplateSelector? viewTemplateSelector, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            if (cancellationToken.IsCancellationRequested)
+            {
+#if NET
+                return ValueTask.FromCanceled<object?>(cancellationToken);
+#else
+                return new ValueTask<object?>(Task.FromCanceled<object?>(cancellationToken));
+#endif
+            }
+
             if (viewTemplate != null || viewTemplateSelector != null)
             {
-                return new ContentPresenter()
+                return new ValueTask<object?>(new ContentPresenter()
                 {
                     ContentTemplate = viewTemplate,
                     ContentTemplateSelector = viewTemplateSelector
-                };
+                });
             }
-            return await GetOrCreateViewAsync(documentType, cancellationToken).ConfigureAwait(false);
+
+            return GetOrCreateViewAsync(documentType, cancellationToken);
         }
 
         /// <summary>
@@ -45,9 +54,19 @@ namespace Minimal.Mvvm.Windows
         /// <returns>A task that represents the asynchronous operation. The task result contains the created view object.</returns>
         public virtual ValueTask<object?> GetOrCreateViewAsync(string? viewName, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            if (cancellationToken.IsCancellationRequested)
+            {
+#if NET
+                return ValueTask.FromCanceled<object?>(cancellationToken);
+#else
+                return new ValueTask<object?>(Task.FromCanceled<object?>(cancellationToken));
+#endif
+            }
+
             var viewType = GetViewType(viewName);
-            return viewType != null ? new ValueTask<object?>(CreateViewFromType(viewType, viewName)) : new ValueTask<object?>(CreateFallbackView(viewName));
+            return viewType != null 
+                ? new ValueTask<object?>(CreateViewFromType(viewType, viewName)) 
+                : new ValueTask<object?>(CreateFallbackView(viewName));
         }
 
         /// <summary>
@@ -65,7 +84,7 @@ namespace Minimal.Mvvm.Windows
         /// <returns>The created view object.</returns>
         protected virtual object? CreateViewFromType(Type viewType, string? viewName)
         {
-            Throw.IfNull(viewType);
+            ArgumentNullException.ThrowIfNull(viewType);
             var ctor = viewType.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, [], null);
             if (ctor != null)
             {
