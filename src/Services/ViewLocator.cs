@@ -17,6 +17,8 @@ namespace Minimal.Mvvm.Windows
         private readonly ConcurrentDictionary<string, Type> _registeredTypes = new();
         private readonly ConcurrentDictionary<string, Type> _nameCache = new();
         private readonly ConcurrentDictionary<string, Type> _fullNameCache = new();
+        private readonly ConcurrentDictionary<Assembly, Type[]> _assemblyCache = new();
+        private readonly ConcurrentDictionary<Assembly, bool> _skipAssemblyCache = new();
 
         #region Properties
 
@@ -45,6 +47,16 @@ namespace Minimal.Mvvm.Windows
         {
             _nameCache.Clear();
             _fullNameCache.Clear();
+            _assemblyCache.Clear();
+            _skipAssemblyCache.Clear();
+        }
+
+        /// <summary>
+        /// Clears all registered view types.
+        /// </summary>
+        public void ClearRegisteredTypes()
+        {
+            _registeredTypes.Clear();
         }
 
         /// <summary>
@@ -97,16 +109,16 @@ namespace Minimal.Mvvm.Windows
         }
 
         /// <summary>
-        /// Gets types from the assemblies specified by <see cref="Assemblies"/>.
+        /// Returns view-eligible types from assemblies specified by <see cref="Assemblies"/> using cached assembly filtering.
         /// </summary>
-        /// <returns>An enumerable collection of types.</returns>
+        /// <returns>An enumerable collection of view candidate types.</returns>
         protected virtual IEnumerable<Type> GetTypes()
         {
             var entryAssembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
             var processedAssemblies = new HashSet<Assembly>() { entryAssembly };
 
             // 1. Entry assembly first (most likely to contain views)
-            foreach (var type in GetAssemblyTypes(entryAssembly))
+            foreach (var type in _assemblyCache.GetOrAdd(entryAssembly, GetAssemblyTypes))
             {
                 yield return type;
             }
@@ -118,40 +130,40 @@ namespace Minimal.Mvvm.Windows
                 {
                     continue;
                 }
-                if (ShouldSkipAssembly(assembly))
+                if (_skipAssemblyCache.GetOrAdd(assembly, ShouldSkipAssembly))
                 {
                     continue;
                 }
 
-                foreach (var type in GetAssemblyTypes(assembly))
+                foreach (var type in _assemblyCache.GetOrAdd(assembly, GetAssemblyTypes))
                 {
                     yield return type;
                 }
             }
+        }
 
-            static Type[] GetAssemblyTypes(Assembly assembly)
+        private static Type[] GetAssemblyTypes(Assembly assembly)
+        {
+            var builder = new ValueListBuilder<Type>(100);
+            Type?[] assemblyTypes;
+            try
             {
-                var builder = new ValueListBuilder<Type>(128);
-                Type?[] assemblyTypes;
-                try
-                {
-                    assemblyTypes = assembly.GetTypes();
-                }
-                catch (ReflectionTypeLoadException ex)
-                {
-                    assemblyTypes = ex.Types;
-                }
-                foreach (var type in assemblyTypes)
-                {
-                    if (type == null || ShouldSkipType(type))
-                    {
-                        continue;
-                    }
-                    builder.Append(type);
-                }
-                Debug.Assert(builder.Length < 256, $"builder.Length: {builder.Length}. Encrease capacity.");
-                return builder.ToArray();
+                assemblyTypes = assembly.GetTypes();
             }
+            catch (ReflectionTypeLoadException ex)
+            {
+                assemblyTypes = ex.Types;
+            }
+            foreach (var type in assemblyTypes)
+            {
+                if (type == null || ShouldSkipType(type))
+                {
+                    continue;
+                }
+                builder.Append(type);
+            }
+            Debug.Assert(builder.Length < 128, $"builder.Length: {builder.Length}. Encrease capacity.");
+            return builder.ToArray();
         }
 
         /// <summary>
