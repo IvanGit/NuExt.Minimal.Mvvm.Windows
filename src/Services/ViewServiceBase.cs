@@ -9,8 +9,7 @@ namespace Minimal.Mvvm.Windows
     /// An abstract base class that provides services related to views in an MVVM framework.
     /// Provides view creation, template selection, and locator services for view models.
     /// </summary>
-    /// <typeparam name="T">The type of the framework element that this service will manage.</typeparam>
-    public abstract class ViewServiceBase<T> : ServiceBase<T> where T : FrameworkElement
+    public abstract class ViewServiceBase : ServiceBase<Control>
     {
         #region Dependency Properties
 
@@ -18,22 +17,22 @@ namespace Minimal.Mvvm.Windows
         /// Identifies the <see cref="ViewLocator"/> dependency property.
         /// </summary>
         public static readonly DependencyProperty ViewLocatorProperty = DependencyProperty.Register(
-            nameof(ViewLocator), typeof(ViewLocatorBase), typeof(ViewServiceBase<T>),
-            new PropertyMetadata(null, (d, e) => ((ViewServiceBase<T>)d).OnViewLocatorChanged((ViewLocatorBase?)e.OldValue, (ViewLocatorBase?)e.NewValue)));
+            nameof(ViewLocator), typeof(ViewLocatorBase), typeof(ViewServiceBase),
+            new PropertyMetadata(null, (d, e) => ((ViewServiceBase)d).OnViewLocatorChanged((ViewLocatorBase?)e.OldValue, (ViewLocatorBase?)e.NewValue)));
 
         /// <summary>
         /// Identifies the <see cref="ViewTemplate"/> dependency property.
         /// </summary>
         public static readonly DependencyProperty ViewTemplateProperty = DependencyProperty.Register(
-            nameof(ViewTemplate), typeof(DataTemplate), typeof(ViewServiceBase<T>),
-            new PropertyMetadata(null, (d, e) => ((ViewServiceBase<T>)d).OnViewTemplateChanged((DataTemplate?)e.OldValue, (DataTemplate?)e.NewValue)));
+            nameof(ViewTemplate), typeof(DataTemplate), typeof(ViewServiceBase),
+            new PropertyMetadata(null, (d, e) => ((ViewServiceBase)d).OnViewTemplateChanged((DataTemplate?)e.OldValue, (DataTemplate?)e.NewValue)));
 
         /// <summary>
         /// Identifies the <see cref="ViewTemplateSelector"/> dependency property.
         /// </summary>
         public static readonly DependencyProperty ViewTemplateSelectorProperty = DependencyProperty.Register(
-            nameof(ViewTemplateSelector), typeof(DataTemplateSelector), typeof(ViewServiceBase<T>),
-            new PropertyMetadata(null, (d, e) => ((ViewServiceBase<T>)d).OnViewTemplateSelectorChanged((DataTemplateSelector?)e.OldValue, (DataTemplateSelector?)e.NewValue)));
+            nameof(ViewTemplateSelector), typeof(DataTemplateSelector), typeof(ViewServiceBase),
+            new PropertyMetadata(null, (d, e) => ((ViewServiceBase)d).OnViewTemplateSelectorChanged((DataTemplateSelector?)e.OldValue, (DataTemplateSelector?)e.NewValue)));
 
         #endregion
 
@@ -117,7 +116,7 @@ namespace Minimal.Mvvm.Windows
         {
             if (cancellationToken.IsCancellationRequested)
             {
-                return new ValueTask<object?>(Task.FromCanceled<object?>(cancellationToken));
+                return ValueTask.FromCanceled<object?>(cancellationToken);
             }
             return GetViewLocator().CreateViewAsync(documentType, ViewTemplate, ViewTemplateSelector, cancellationToken);
         }

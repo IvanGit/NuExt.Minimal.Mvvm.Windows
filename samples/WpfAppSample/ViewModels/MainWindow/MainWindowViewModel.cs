@@ -114,6 +114,7 @@ namespace MovieWpfApp.ViewModels
 
         private ValueTask LoadMenuAsync(CancellationToken cancellationToken)
         {
+            VerifyAccess();
             cancellationToken.ThrowIfCancellationRequested();
             MenuItems.Clear();
             var menuItems = new MenuItemViewModel[]
@@ -147,12 +148,12 @@ namespace MovieWpfApp.ViewModels
             return default;
         }
 
-        protected override async ValueTask OnDisposeAsync()
+        protected override async ValueTask DisposeAsyncCore()
         {
             var doc = DocumentManagerService?.FindDocumentById(default(Movies));
             Settings!.MoviesOpened = doc is not null;
 
-            await base.OnDisposeAsync();
+            await base.DisposeAsyncCore().ConfigureAwait(false);
         }
 
         protected override void OnError(Exception ex, [CallerMemberName] string? callerName = null)
@@ -168,7 +169,7 @@ namespace MovieWpfApp.ViewModels
             MessageBox.Show(WindowService?.Window, string.Format(Loc.An_error_has_occurred_in_Arg0_Arg1, callerName, ex.Message), Loc.Error, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        protected override Task OnInitializeAsync(CancellationToken cancellationToken)
+        protected override Task InitializeAsyncCore(CancellationToken cancellationToken)
         {
             Debug.Assert(DocumentManagerService != null, $"{nameof(DocumentManagerService)} is null");
             Debug.Assert(EnvironmentService != null, $"{nameof(EnvironmentService)} is null");
@@ -198,7 +199,7 @@ namespace MovieWpfApp.ViewModels
                     () => notifyPropertyChanged1.PropertyChanged -= WindowManagerService_PropertyChanged);
             }
 
-            return base.OnInitializeAsync(cancellationToken);
+            return base.InitializeAsyncCore(cancellationToken);
         }
 
         private void UpdateTitle()

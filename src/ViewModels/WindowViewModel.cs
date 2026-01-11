@@ -9,14 +9,17 @@ namespace Minimal.Mvvm.Windows
     /// Represents a ViewModel for a window, providing properties and methods for managing the window's state,
     /// services for handling various window-related operations, and commands for interacting with the UI.
     /// </summary>
-    public partial class WindowViewModel : ControlViewModel
+    public partial class WindowViewModel : ControlViewModel, IWindowViewModel
     {
+        private readonly CancellationTokenSource _cts = new();
+        private bool _isClosing;
+
         #region Properties
 
         /// <summary>
-        /// Gets the <see cref="CancellationTokenSource"/> used for managing cancellation of asynchronous operations.
+        /// Gets the cancellation token for this window's lifecycle.
         /// </summary>
-        public CancellationTokenSource CancellationTokenSource { get; } = new();
+        public CancellationToken CancellationToken => _cts.Token;
 
         /// <summary>
         /// Gets or sets the title of the window.
@@ -31,17 +34,17 @@ namespace Minimal.Mvvm.Windows
         /// <summary>
         /// Gets the service responsible for managing open windows.
         /// </summary>
-        protected OpenWindowsService? OpenWindowsService => GetService<OpenWindowsService>();
+        protected IOpenWindowsService? OpenWindowsService => GetService<IOpenWindowsService>();
 
         /// <summary>
         /// Gets the service responsible for managing window placement.
         /// </summary>
-        protected WindowPlacementService? WindowPlacementService => GetService<WindowPlacementService>();
+        protected IWindowPlacementService? WindowPlacementService => GetService<IWindowPlacementService>();
 
         /// <summary>
         /// Gets the service responsible for managing the current window.
         /// </summary>
-        protected WindowService? WindowService => GetService<WindowService>();
+        protected IWindowService? WindowService => GetService<IWindowService>();
 
         #endregion
 
@@ -54,7 +57,7 @@ namespace Minimal.Mvvm.Windows
         /// <returns>True if the window can be closed; otherwise, false.</returns>
         protected virtual ValueTask<bool> CanCloseAsync(CancellationToken cancellationToken)
         {
-            return new ValueTask<bool>(true);
+            return cancellationToken.IsCancellationRequested ? ValueTask.FromCanceled<bool>(cancellationToken) : ValueTask.FromResult(true);
         }
 
         /// <summary>
@@ -62,15 +65,21 @@ namespace Minimal.Mvvm.Windows
         /// </summary>
         private void Close()
         {
+            Debug.Assert(CheckAccess());
+            VerifyAccess();
+
             Debug.Assert(WindowService != null, $"{nameof(WindowService)} is null");
             WindowService?.Close();
         }
 
         /// <summary>
-        /// Closes the window asynchronously, optionally forcing closure.
+        /// Asynchronously closes the window and disposes the ViewModel if closure is not canceled. 
+        /// A disposed ViewModel should not be reused.
         /// </summary>
-        /// <param name="force">If true, forces the window to close.</param>
-        /// <returns>A task representing the asynchronous close operation.</returns>
+        /// <param name="force">
+        /// <see langword="true"/> to close immediately; 
+        /// <see langword="false"/> to allow cancellation via <see cref="CanCloseAsync"/>.
+        /// </param>
         public async ValueTask CloseAsync(bool force = true)
         {
             Debug.Assert(CheckAccess());
@@ -79,6 +88,12 @@ namespace Minimal.Mvvm.Windows
             VerifyAccess();
             CheckDisposed();
 
+            if (_isClosing)
+            {
+                return;
+            }
+
+            _isClosing = true;
             try
             {
                 if (force)
@@ -89,12 +104,12 @@ namespace Minimal.Mvvm.Windows
                 {
                     try
                     {
-                        if (await CanCloseAsync(CancellationTokenSource.Token) == false)
+                        if (await CanCloseAsync(CancellationToken) == false)
                         {
                             return;
                         }
                     }
-                    catch (OperationCanceledException) when (CancellationTokenSource.IsCancellationRequested)
+                    catch (OperationCanceledException) when (CancellationToken.IsCancellationRequested)
                     {
                         //do nothing and return
                         return;
@@ -102,20 +117,28 @@ namespace Minimal.Mvvm.Windows
                 }
 
 #if NET8_0_OR_GREATER
-                await CancellationTokenSource.CancelAsync();
+                await _cts.CancelAsync();
 #else
-                CancellationTokenSource.Cancel();
+                _cts.Cancel();
 #endif
                 Hide();
                 await DisposeAsync();
 
                 Debug.Assert(CheckAccess());
                 Close();
-                CancellationTokenSource.Dispose();
+                _cts.Dispose();
             }
             catch (Exception ex)
             {
                 OnError(ex);
+                if (force)
+                {
+                    throw;
+                }
+            }
+            finally
+            {
+                _isClosing = false;
             }
         }
 
@@ -123,6 +146,15 @@ namespace Minimal.Mvvm.Windows
         {
             Debug.Assert(WindowService != null, $"{nameof(WindowService)} is null");
             WindowService?.Hide();
+        }
+
+        /// <inheritdoc/>
+        protected override Task InitializeAsyncCore(CancellationToken cancellationToken)
+        {
+            Debug.Assert(WindowService != null, $"{nameof(WindowService)} is null");
+            Debug.Assert(OpenWindowsService != null, $"{nameof(OpenWindowsService)} is null");
+            Debug.Assert(WindowPlacementService != null, $"{nameof(WindowPlacementService)} is null");
+            return base.InitializeAsyncCore(cancellationToken);
         }
 
         #endregion

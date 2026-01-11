@@ -60,11 +60,11 @@ namespace MovieWpfApp.ViewModels
 
         #region Methods
 
-        protected override async ValueTask OnDisposeAsync()
+        protected override async ValueTask DisposeAsyncCore()
         {
             Settings!.SelectedPath = SelectedItem?.GetPath();
 
-            await base.OnDisposeAsync();
+            await base.DisposeAsyncCore().ConfigureAwait(false);
         }
 
         protected override void OnError(Exception ex, [CallerMemberName] string? callerName = null)
@@ -80,7 +80,7 @@ namespace MovieWpfApp.ViewModels
             MessageBox.Show(GetService<WindowService>()?.Window, string.Format(Loc.An_error_has_occurred_in_Arg0_Arg1, callerName, ex.Message), Loc.Error, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        protected override async Task OnInitializeAsync(CancellationToken cancellationToken)
+        protected override async Task InitializeAsyncCore(CancellationToken cancellationToken)
         {
             Debug.Assert(DialogService != null, $"{nameof(DialogService)} is null");
             Debug.Assert(EnvironmentService != null, $"{nameof(EnvironmentService)} is null");
@@ -88,7 +88,7 @@ namespace MovieWpfApp.ViewModels
             Debug.Assert(ParentViewModel != null, $"{nameof(ParentViewModel)} is null");
             Debug.Assert(SettingsService != null, $"{nameof(SettingsService)} is null");
 
-            await base.OnInitializeAsync(cancellationToken);
+            await base.InitializeAsyncCore(cancellationToken);
 
             Movies = [];
             Lifetime.Add(Movies.Clear);

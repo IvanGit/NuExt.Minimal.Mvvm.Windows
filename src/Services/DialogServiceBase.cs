@@ -14,7 +14,7 @@ namespace Minimal.Mvvm.Windows
     /// and determining the result of dialogs based on user actions. It simplifies the implementation of dialog-related 
     /// functionalities by offering a consistent approach to handle localization and command creation.
     /// </remarks>
-    public abstract class DialogServiceBase : ViewServiceBase<Control>
+    public abstract class DialogServiceBase : ViewServiceBase
     {
         #region Dependency Properties
 

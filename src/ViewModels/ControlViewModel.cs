@@ -10,8 +10,28 @@ namespace Minimal.Mvvm.Windows
     /// <summary>
     /// Represents a base class for control-specific ViewModels, extending the functionality of the <see cref="ViewModelBase"/> class.
     /// </summary>
-    public partial class ControlViewModel : ViewModelBase, IAsyncDisposable
+    public partial class ControlViewModel : ViewModelBase, IControlViewModel, IAsyncDisposable
     {
+#if NET9_0_OR_GREATER
+        private enum States
+        {
+            NotDisposed,// default value of _state
+            Disposing,
+            Disposed
+        }
+
+        private volatile States _state;
+#else
+        private class States
+        {
+            public const int NotDisposed = 0;// default value of _state
+            public const int Disposing = 1;
+            public const int Disposed = 2;
+        }
+
+        private volatile int _state;
+#endif
+
         public ControlViewModel()
         {
             if (IsInDesignMode)
@@ -30,37 +50,15 @@ namespace Minimal.Mvvm.Windows
         /// </summary>
         public string? DisplayName { get; set; }
 
-        private bool _isDisposed;
         /// <summary>
         /// Gets a value indicating whether the ViewModel has been disposed.
         /// </summary>
-        public bool IsDisposed
-        {
-            get => _isDisposed;
-            private set
-            {
-                if (_isDisposed == value) return;
-                _isDisposed = value;
-                OnPropertyChanged(EventArgsCache.IsDisposedPropertyChanged);
-                OnPropertyChanged(EventArgsCache.IsUsablePropertyChanged);
-            }
-        }
+        public bool IsDisposed => _state == States.Disposed;
 
-        private bool _isDisposing;
         /// <summary>
         /// Gets a value indicating whether the ViewModel is currently disposing.
         /// </summary>
-        public bool IsDisposing
-        {
-            get => _isDisposing;
-            private set
-            {
-                if (_isDisposing == value) return;
-                _isDisposing = value;
-                OnPropertyChanged(EventArgsCache.IsDisposingPropertyChanged);
-                OnPropertyChanged(EventArgsCache.IsUsablePropertyChanged);
-            }
-        }
+        public bool IsDisposing => _state == States.Disposing;
 
         /// <summary>
         /// Gets a value indicating whether the object is usable.
@@ -87,12 +85,15 @@ namespace Minimal.Mvvm.Windows
 
             switch (e.PropertyName)
             {
-                case nameof(IsInitialized):
-                    OnPropertyChanged(EventArgsCache.IsUsablePropertyChanged);
-                    break;
                 case nameof(IsDisposing) when IsDisposing:
                     CancelAsyncCommands();
+                    goto case nameof(IsDisposing);
+                case nameof(IsInitialized):
+                case nameof(IsDisposed):
+                case nameof(IsDisposing):
+                    OnPropertyChanged(EventArgsCache.IsUsablePropertyChanged);
                     break;
+
             }
         }
 
@@ -117,30 +118,40 @@ namespace Minimal.Mvvm.Windows
 
         /// <summary>
         /// Asynchronously disposes of the resources used by the instance.
+        /// This method must be called from the UI thread (same thread where the instance was created).
         /// </summary>
         public async ValueTask DisposeAsync()
         {
-            if (IsDisposed || IsDisposing)
+            Debug.Assert(CheckAccess());
+            VerifyAccess();
+
+            if (_state != States.NotDisposed)
             {
+                // Already disposing or disposed
                 return;
             }
-            IsDisposing = true;
+            _state = States.Disposing;
+
+            OnPropertyChanged(EventArgsCache.IsDisposingPropertyChanged);
             try
             {
                 ValidateDisposingState();
-                await OnDisposeAsync().ConfigureAwait(false);
+                //https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-disposeasync
+                await DisposeAsyncCore().ConfigureAwait(false);
                 ValidateFinalState();
-                IsDisposed = true;
             }
             catch (Exception ex)
             {
-                Trace.WriteLine($"{GetType().FullName} ({DisplayName ?? "Unnamed"}) ({GetHashCode()}):{Environment.NewLine}{ex.Message}");
-                Debug.Fail($"{GetType().FullName} ({DisplayName ?? "Unnamed"}) ({GetHashCode()}):{Environment.NewLine}{ex.Message}");
+                string errorMessage = $"{GetType().FullName} ({DisplayName ?? "Unnamed"}) ({GetHashCode()}):{Environment.NewLine}{ex.Message}";
+                Trace.WriteLine(errorMessage);
+                Debug.Fail(errorMessage);
                 throw;
             }
             finally
             {
-                IsDisposing = false;
+                _state = States.Disposed;
+                OnPropertyChanged(EventArgsCache.IsDisposingPropertyChanged);
+                OnPropertyChanged(EventArgsCache.IsDisposedPropertyChanged);
             }
             GC.SuppressFinalize(this);
         }
@@ -149,7 +160,7 @@ namespace Minimal.Mvvm.Windows
         /// Performs application-defined tasks associated with freeing, releasing, or resetting managed resources asynchronously.
         /// </summary>
         /// <returns>A task that represents the asynchronous dispose operation.</returns>
-        protected virtual ValueTask OnDisposeAsync()
+        protected virtual ValueTask DisposeAsyncCore()
         {
             return Lifetime.DisposeAsync();
         }
@@ -164,10 +175,14 @@ namespace Minimal.Mvvm.Windows
             Trace.WriteLine($"An error has occurred in {callerName}:{Environment.NewLine}{ex.Message}");
         }
 
-        /// <inheritdoc />
-        protected override async Task OnUninitializeAsync(CancellationToken cancellationToken)
+        /// <summary>
+        /// When overridden in a derived class, asynchronously performs the uninitialization logic for the ViewModel.
+        /// This method always calls <see cref="DisposeAsync"/> to ensure proper resource cleanup,
+        /// regardless of the cancellation state.
+        /// </summary>
+        protected override Task UninitializeAsyncCore(CancellationToken cancellationToken)
         {
-            await DisposeAsync().ConfigureAwait(false);
+            return InvokeAsync(() => DisposeAsync().AsTask());
         }
 
         #endregion

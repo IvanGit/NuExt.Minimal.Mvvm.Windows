@@ -13,18 +13,18 @@ namespace Minimal.Mvvm.Windows
         /// <summary>
         /// Gets the collection of registered window view models.
         /// </summary>
-        IEnumerable<WindowViewModel> ViewModels { get; }
+        IEnumerable<IWindowViewModel> ViewModels { get; }
 
         /// <summary>
         /// Registers a window view model.
         /// </summary>
         /// <param name="viewModel">The view model to register.</param>
-        void Register(WindowViewModel viewModel);
+        void Register(IWindowViewModel viewModel);
 
         /// <summary>
         /// Unregisters a window view model.
         /// </summary>
         /// <param name="viewModel">The view model to unregister.</param>
-        void Unregister(WindowViewModel viewModel);
+        void Unregister(IWindowViewModel viewModel);
     }
 }

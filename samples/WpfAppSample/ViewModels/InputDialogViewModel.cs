@@ -17,9 +17,9 @@ namespace MovieWpfApp.ViewModels
 
         #region Methods
 
-        protected override async Task OnInitializeAsync(CancellationToken cancellationToken)
+        protected override async Task InitializeAsyncCore(CancellationToken cancellationToken)
         {
-            await base.OnInitializeAsync(cancellationToken);
+            await base.InitializeAsyncCore(cancellationToken);
             if (Parameter is string text)
             {
                 InputText = text;

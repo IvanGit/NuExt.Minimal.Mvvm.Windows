@@ -47,7 +47,7 @@ namespace Minimal.Mvvm.Windows
         /// <code>
         /// &lt;minimal:EventTrigger EventName="Closing" Command="{Binding ClosingCommand}" PassEventArgsToCommand="True" /&gt;
         /// </code>
-        /// The command allows you to manage cancellation in the <see cref="CanCloseAsync"/> method and perform cleanup operations in the <see cref="ControlViewModel.OnDisposeAsync"/> method when the window is closing.
+        /// The command allows you to manage cancellation in the <see cref="CanCloseAsync"/> method and perform cleanup operations in the <see cref="ControlViewModel.DisposeAsyncCore"/> method when the window is closing.
         /// Note that <c>PassEventArgsToCommand</c> must be specified and set to <c>True</c> to pass the <see cref="System.ComponentModel.CancelEventArgs"/> to the command.
         /// </remarks>
         [Notify(Setter = Private)]
@@ -94,11 +94,11 @@ namespace Minimal.Mvvm.Windows
         {
             try
             {
-                await OnContentRenderedAsync(CancellationTokenSource.Token).ConfigureAwait(false);
+                await OnContentRenderedAsync(CancellationToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException ex)
             {
-                if (CancellationTokenSource.IsCancellationRequested == false)
+                if (CancellationToken.IsCancellationRequested == false)
                 {
                     Debug.Fail(ex.Message);
                     throw;
@@ -106,14 +106,13 @@ namespace Minimal.Mvvm.Windows
             }
             catch (Exception ex)
             {
-                //TODO logging
-                if (CancellationTokenSource.IsCancellationRequested == false)
+                if (CancellationToken.IsCancellationRequested == false)
                 {
                     OnError(ex);
                 }
             }
 
-            if (CancellationTokenSource.IsCancellationRequested) return;
+            if (CancellationToken.IsCancellationRequested) return;
 
             var openWindowsService = OpenWindowsService;
             if (openWindowsService != null)
@@ -129,12 +128,12 @@ namespace Minimal.Mvvm.Windows
         private void Closing(CancelEventArgs arg)
         {
             //https://weblog.west-wind.com/posts/2019/Sep/02/WPF-Window-Closing-Errors
-            if (arg.Cancel)
+            if (arg.Cancel || _isClosing)
             {
                 return;
             }
 
-            if (CancellationTokenSource.IsCancellationRequested || IsDisposed)
+            if (CancellationToken.IsCancellationRequested)
             {
                 arg.Cancel = IsDisposing;//do not close while disposing
                 return;
@@ -230,10 +229,7 @@ namespace Minimal.Mvvm.Windows
         /// </remarks>
         protected virtual ValueTask OnContentRenderedAsync(CancellationToken cancellationToken)
         {
-            Debug.Assert(WindowService != null, $"{nameof(WindowService)} is null");
-            Debug.Assert(OpenWindowsService != null, $"{nameof(OpenWindowsService)} is null");
-            Debug.Assert(WindowPlacementService != null, $"{nameof(WindowPlacementService)} is null");
-            return default;
+            return cancellationToken.IsCancellationRequested ? ValueTask.FromCanceled(cancellationToken) : ValueTask.CompletedTask;
         }
 
         #endregion

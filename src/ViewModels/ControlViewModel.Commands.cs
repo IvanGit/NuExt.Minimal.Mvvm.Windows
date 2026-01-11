@@ -230,7 +230,6 @@ namespace Minimal.Mvvm.Windows
         /// </summary>
         public void RaiseCanExecuteChanged()
         {
-            CheckDisposed();
             scoped var commandBuilder = new ValueListBuilder<(string PropertyName, ICommand? Command)>([default, default, default, default, default, default, default, default]);
             GetAllCommands(ref commandBuilder);
             foreach (var (_, command) in commandBuilder.AsSpan())
@@ -258,7 +257,7 @@ namespace Minimal.Mvvm.Windows
             scoped var commandBuilder = new ValueListBuilder<(string PropertyName, ICommand? Command)>([default, default, default, default, default, default, default, default]);
             GetAllCommands(ref commandBuilder);
 
-            scoped var taskBuilder = new ValueListBuilder<Task>([default, default, default, default, default, default, default, default]);
+            scoped var taskBuilder = new ValueListBuilder<Task>([null, null, null, null, null, null, null, null]);
             foreach (var (_, command) in commandBuilder.AsSpan())
             {
                 if (command is IAsyncCommand { IsExecuting: true } asyncCommand)

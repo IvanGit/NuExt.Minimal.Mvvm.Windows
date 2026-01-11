@@ -119,6 +119,7 @@ namespace Minimal.Mvvm.Windows
             var window = sender as Window;
             Debug.Assert(window != null, "Window is null");
             window!.SourceInitialized -= OnSourceInitialized;
+            if (IsEnabled == false) return;
             try
             {
                 if (File.Exists(FilePath))
@@ -193,6 +194,7 @@ namespace Minimal.Mvvm.Windows
 
         private void InternalSavePlacement(Window? window)
         {
+            if (IsEnabled == false) return;
             try
             {
                 var s = window?.GetPlacementAsJson();

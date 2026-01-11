@@ -27,7 +27,7 @@ namespace Minimal.Mvvm.Windows
             var displayName = DisplayName ?? "Unnamed";
             var hashCode = GetHashCode();
 
-            var commands = this.GetAllCommands();
+            var commands = GetAllCommands();
             Debug.Assert(commands.All(c => c.Command is null), $"{typeName} ({displayName}) ({hashCode}) has not nullified commands.");
         }
     }

@@ -16,9 +16,9 @@ namespace Minimal.Mvvm.Windows
     /// <summary>
     /// The WindowedDocumentService class is responsible for managing windowed documents within a UI. 
     /// It extends the DocumentServiceBase and implements interfaces for asynchronous document management and disposal. 
-    /// This service allows for the creation, binding, and lifecycle management of windowed documents within the main window.
+    /// This service allows for the creation, binding, and lifecycle management of windowed documents within the associated control.
     /// </summary>
-    public sealed class WindowedDocumentService : DocumentServiceBase<Window>, IAsyncDocumentManagerService, IAsyncDisposable
+    public sealed class WindowedDocumentService : DocumentServiceBase, IAsyncDocumentManagerService, IAsyncDisposable
     {
         #region WindowedDocument
 
@@ -179,9 +179,9 @@ namespace Minimal.Mvvm.Windows
                 {
                     return;
                 }
+                _isClosing = true;
                 try
                 {
-                    _isClosing = true;
                     if (!force)
                     {
                         try
@@ -261,15 +261,8 @@ namespace Minimal.Mvvm.Windows
 
         #region Dependency Properties
 
-        public static readonly DependencyProperty ActiveDocumentProperty = DependencyProperty.Register(
-            nameof(ActiveDocument), typeof(IAsyncDocument), typeof(WindowedDocumentService),
-            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (d, e) => ((WindowedDocumentService)d).OnActiveDocumentChanged(e.OldValue as IAsyncDocument, e.NewValue as IAsyncDocument)));
-
         public static readonly DependencyProperty SetWindowOwnerProperty = DependencyProperty.Register(
             nameof(SetWindowOwner), typeof(bool), typeof(WindowedDocumentService));
-
-        public static readonly DependencyProperty UnresolvedViewTypeProperty = DependencyProperty.Register(
-            nameof(UnresolvedViewType), typeof(Type), typeof(WindowedDocumentService));
 
         public static readonly DependencyProperty WindowStartupLocationProperty = DependencyProperty.Register(
             nameof(WindowStartupLocation), typeof(WindowStartupLocation), typeof(WindowedDocumentService), new PropertyMetadata(WindowStartupLocation.CenterScreen));
@@ -291,19 +284,7 @@ namespace Minimal.Mvvm.Windows
             (_documents as INotifyPropertyChanged).PropertyChanged += OnDocumentsPropertyChanged;
         }
 
-        #region Events
-
-        public event EventHandler<ActiveDocumentChangedEventArgs>? ActiveDocumentChanged;
-
-        #endregion
-
         #region Properties
-
-        public IAsyncDocument? ActiveDocument
-        {
-            get => (IAsyncDocument)GetValue(ActiveDocumentProperty);
-            set => SetValue(ActiveDocumentProperty, value);
-        }
 
         public int Count => _documents.Count;
 
@@ -313,12 +294,6 @@ namespace Minimal.Mvvm.Windows
         {
             get => (bool)GetValue(SetWindowOwnerProperty);
             set => SetValue(SetWindowOwnerProperty, value);
-        }
-
-        public Type? UnresolvedViewType
-        {
-            get => (Type)GetValue(UnresolvedViewTypeProperty);
-            set => SetValue(UnresolvedViewTypeProperty, value);
         }
 
         public WindowStartupLocation WindowStartupLocation
@@ -349,11 +324,11 @@ namespace Minimal.Mvvm.Windows
 
         #region Event Handlers
 
-        private void OnActiveDocumentChanged(IAsyncDocument? oldValue, IAsyncDocument? newValue)
+        protected override void OnActiveDocumentChanged(IAsyncDocument? oldValue, IAsyncDocument? newValue)
         {
             Debug.Assert(oldValue != newValue);
             newValue?.Show();
-            ActiveDocumentChanged?.Invoke(this, new ActiveDocumentChangedEventArgs(oldValue, newValue));
+            base.OnActiveDocumentChanged(oldValue, newValue);
         }
 
         private void OnDocumentsPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -373,15 +348,8 @@ namespace Minimal.Mvvm.Windows
         {
             Throw.IfNull(AssociatedObject);
             cancellationToken.ThrowIfCancellationRequested();
-            object? view;
-            if (documentType == null && ViewTemplate == null && ViewTemplateSelector == null)
-            {
-                view = GetUnresolvedView() ?? await GetViewLocator().GetOrCreateViewAsync(documentType, cancellationToken);
-            }
-            else
-            {
-                view = await CreateViewAsync(documentType, cancellationToken);
-            }
+
+            var view = await CreateViewAsync(documentType, cancellationToken);
 
             var window = CreateWindow(view, viewModel);
             ViewModelHelper.SetDataContextBinding(view, FrameworkElement.DataContextProperty, window);
@@ -405,7 +373,7 @@ namespace Minimal.Mvvm.Windows
 
             if (SetWindowOwner)
             {
-                window.Owner = AssociatedObject;
+                window.Owner = AssociatedObject as Window ?? Window.GetWindow(AssociatedObject);
             }
             window.WindowStartupLocation = WindowStartupLocation;
 
@@ -454,11 +422,6 @@ namespace Minimal.Mvvm.Windows
             {
                 (_documents as INotifyPropertyChanged).PropertyChanged -= OnDocumentsPropertyChanged;
             }
-        }
-
-        private object? GetUnresolvedView()
-        {
-            return UnresolvedViewType == null ? null : Activator.CreateInstance(UnresolvedViewType);
         }
 
         private Style? GetWindowStyle(Window window, object? viewModel)

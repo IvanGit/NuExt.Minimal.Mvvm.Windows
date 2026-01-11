@@ -11,19 +11,15 @@ namespace Minimal.Mvvm.Windows
     /// This service maintains a list of currently open window view models and offers functionality to register,
     /// unregister, and force-close all registered windows asynchronously. It ensures thread safety.
     /// </summary>
-    public sealed class OpenWindowsService : AsyncDisposable, IOpenWindowsService
+    public sealed class OpenWindowsService() : AsyncDisposable(continueOnCapturedContext: true), IOpenWindowsService
     {
-        private readonly List<WindowViewModel> _viewModels = [];
+        private readonly List<IWindowViewModel> _viewModels = [];
         private readonly AsyncLock _lock = new();
-
-        public OpenWindowsService() : base(continueOnCapturedContext: true)
-        {
-        }
 
         /// <summary>
         /// Gets open window view models.
         /// </summary>
-        public IEnumerable<WindowViewModel> ViewModels
+        public IEnumerable<IWindowViewModel> ViewModels
         {
             get
             {
@@ -47,7 +43,7 @@ namespace Minimal.Mvvm.Windows
         /// <param name="viewModel">The window view model to register.</param>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="viewModel"/> is null.</exception>
         /// <exception cref="ObjectDisposedException">Thrown when the service is disposed.</exception>
-        public void Register(WindowViewModel viewModel)
+        public void Register(IWindowViewModel viewModel)
         {
             ArgumentNullException.ThrowIfNull(viewModel);
             CheckDisposedOrDisposing();
@@ -73,7 +69,7 @@ namespace Minimal.Mvvm.Windows
         /// <param name="viewModel">The window view model to unregister.</param>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="viewModel"/> is null.</exception>
         /// <exception cref="ObjectDisposedException">Thrown when the service is disposed.</exception>
-        public void Unregister(WindowViewModel viewModel)
+        public void Unregister(IWindowViewModel viewModel)
         {
             ArgumentNullException.ThrowIfNull(viewModel);
             CheckDisposed();
@@ -111,6 +107,9 @@ namespace Minimal.Mvvm.Windows
         protected override async ValueTask DisposeAsyncCore()
         {
             Debug.Assert(ContinueOnCapturedContext);
+            Debug.Assert(CheckAccess());
+            VerifyAccess();
+
             await _lock.EnterAsync();
             try
             {

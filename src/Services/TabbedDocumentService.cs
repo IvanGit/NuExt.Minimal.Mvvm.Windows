@@ -18,7 +18,7 @@ namespace Minimal.Mvvm.Windows
     /// It extends the DocumentServiceBase and implements interfaces for asynchronous document management and disposal. 
     /// This service allows for the creation, binding, and lifecycle management of tabbed documents within MetroTabControl.
     /// </summary>
-    public sealed class TabbedDocumentService : DocumentServiceBase<TabControl>, IAsyncDocumentManagerService, IAsyncDisposable
+    public sealed class TabbedDocumentService : DocumentServiceBase, IAsyncDocumentManagerService, IAsyncDisposable
     {
         #region TabbedDocument
 
@@ -118,9 +118,9 @@ namespace Minimal.Mvvm.Windows
                 {
                     return;
                 }
+                _isClosing = true;
                 try
                 {
-                    _isClosing = true;
                     if (!force)
                     {
                         try
@@ -205,52 +205,25 @@ namespace Minimal.Mvvm.Windows
         private bool _isActiveDocumentChanging;
         private IDisposable? _subscription;
 
-        #region Dependency Properties
-
-        public static readonly DependencyProperty ActiveDocumentProperty = DependencyProperty.Register(
-            nameof(ActiveDocument), typeof(IAsyncDocument), typeof(TabbedDocumentService),
-            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (d, e) => ((TabbedDocumentService)d).OnActiveDocumentChanged(e.OldValue as IAsyncDocument, e.NewValue as IAsyncDocument)));
-
-        public static readonly DependencyProperty UnresolvedViewTypeProperty = DependencyProperty.Register(
-            nameof(UnresolvedViewType), typeof(Type), typeof(TabbedDocumentService));
-
-        #endregion
-
         public TabbedDocumentService()
         {
             if (ViewModelBase.IsInDesignMode) return;
             (_documents as INotifyPropertyChanged).PropertyChanged += OnDocumentsPropertyChanged;
         }
 
-        #region Events
-
-        public event EventHandler<ActiveDocumentChangedEventArgs>? ActiveDocumentChanged;
-
-        #endregion
-
         #region Properties
 
-        public IAsyncDocument? ActiveDocument
-        {
-            get => (IAsyncDocument)GetValue(ActiveDocumentProperty);
-            set => SetValue(ActiveDocumentProperty, value);
-        }
+        private new TabControl? AssociatedObject => (TabControl?)base.AssociatedObject;
 
         public int Count => _documents.Count;
 
         public IEnumerable<IAsyncDocument> Documents => _documents;
 
-        public Type? UnresolvedViewType
-        {
-            get => (Type)GetValue(UnresolvedViewTypeProperty);
-            set => SetValue(UnresolvedViewTypeProperty, value);
-        }
-
         #endregion
 
         #region Event Handlers
 
-        private void OnActiveDocumentChanged(IAsyncDocument? oldValue, IAsyncDocument? newValue)
+        protected override void OnActiveDocumentChanged(IAsyncDocument? oldValue, IAsyncDocument? newValue)
         {
             if (!_isActiveDocumentChanging)
             {
@@ -264,7 +237,7 @@ namespace Minimal.Mvvm.Windows
                     _isActiveDocumentChanging = false;
                 }
             }
-            ActiveDocumentChanged?.Invoke(this, new ActiveDocumentChangedEventArgs(oldValue, newValue));
+            base.OnActiveDocumentChanged(oldValue, newValue);
         }
 
         private void OnDocumentsPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -343,15 +316,8 @@ namespace Minimal.Mvvm.Windows
         {
             Throw.IfNull(AssociatedObject);
             cancellationToken.ThrowIfCancellationRequested();
-            object? view;
-            if (documentType == null && ViewTemplate == null && ViewTemplateSelector == null)
-            {
-                view = GetUnresolvedView() ?? await GetViewLocator().GetOrCreateViewAsync(documentType, cancellationToken);
-            }
-            else
-            {
-                view = await CreateViewAsync(documentType, cancellationToken);
-            }
+
+            var view = await CreateViewAsync(documentType, cancellationToken);
 
             var tabItem = new TabItem
             {
@@ -409,11 +375,6 @@ namespace Minimal.Mvvm.Windows
             {
                 (_documents as INotifyPropertyChanged).PropertyChanged -= OnDocumentsPropertyChanged;
             }
-        }
-
-        private object? GetUnresolvedView()
-        {
-            return UnresolvedViewType == null ? null : Activator.CreateInstance(UnresolvedViewType);
         }
 
         /// <inheritdoc />
