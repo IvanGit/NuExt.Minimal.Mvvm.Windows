@@ -280,7 +280,7 @@ namespace Minimal.Mvvm.Windows
 
         public WindowedDocumentService()
         {
-            if (ViewModelBase.IsInDesignMode) return;
+            if (ControlViewModel.IsInDesignMode) return;
             (_documents as INotifyPropertyChanged).PropertyChanged += OnDocumentsPropertyChanged;
         }
 

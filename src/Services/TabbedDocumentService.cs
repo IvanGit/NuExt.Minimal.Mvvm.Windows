@@ -207,7 +207,7 @@ namespace Minimal.Mvvm.Windows
 
         public TabbedDocumentService()
         {
-            if (ViewModelBase.IsInDesignMode) return;
+            if (ControlViewModel.IsInDesignMode) return;
             (_documents as INotifyPropertyChanged).PropertyChanged += OnDocumentsPropertyChanged;
         }
 

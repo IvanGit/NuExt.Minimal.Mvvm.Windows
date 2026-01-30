@@ -9,7 +9,7 @@ namespace Minimal.Mvvm.Windows.Controls
         public FallbackView()
         {
             var tb = new TextBlock();
-            if (ViewModelBase.IsInDesignMode)
+            if (ControlViewModel.IsInDesignMode)
             {
                 tb.FontSize = 24;
                 tb.Foreground = Brushes.Red;

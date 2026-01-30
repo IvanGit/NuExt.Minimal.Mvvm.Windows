@@ -213,7 +213,7 @@ namespace Minimal.Mvvm.Windows
         #endregion
     }
 
-    internal static class EventArgsCache
+    internal static partial class EventArgsCache
     {
         internal static readonly PropertyChangedEventArgs AssociatedObjectPropertyChanged = new(nameof(Behavior.AssociatedObject));
         internal static readonly PropertyChangedEventArgs IsAttachedPropertyChanged = new(nameof(Behavior.IsAttached));

@@ -14,7 +14,7 @@ namespace Minimal.Mvvm.Windows
 
         public MediaElementService()
         {
-            if (ViewModelBase.IsInDesignMode) return;
+            if (ControlViewModel.IsInDesignMode) return;
 
             PlayCommand = new RelayCommand(Play, CanPlay);
             PauseCommand = new RelayCommand(Pause, CanPauseInternal);

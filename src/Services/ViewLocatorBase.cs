@@ -104,7 +104,7 @@ namespace Minimal.Mvvm.Windows
         {
             string errorMessage;
             if (string.IsNullOrEmpty(viewName)) errorMessage = "ViewType is not specified.";
-            else if (ViewModelBase.IsInDesignMode) errorMessage = $"[{viewName}]";
+            else if (ControlViewModel.IsInDesignMode) errorMessage = $"[{viewName}]";
             else errorMessage = $"\"{viewName}\" type not found.";
             return new FallbackView() { Text = errorMessage };
         }

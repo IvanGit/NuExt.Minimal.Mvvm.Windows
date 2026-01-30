@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace Minimal.Mvvm.Windows
 {
@@ -44,6 +46,24 @@ namespace Minimal.Mvvm.Windows
         }
 
         #region Properties
+
+        /// <summary>
+        /// Gets the dispatcher associated with the UI thread.
+        /// </summary>
+        public Dispatcher Dispatcher { get; } = Dispatcher.CurrentDispatcher;
+
+        private static bool? s_isInDesignMode;
+        /// <summary>
+        /// Gets a value indicating whether the ViewModel is in design mode.
+        /// </summary>
+        public static bool IsInDesignMode
+        {
+            get
+            {
+                s_isInDesignMode ??= (bool)DesignerProperties.IsInDesignModeProperty.GetMetadata(typeof(DependencyObject)).DefaultValue;
+                return s_isInDesignMode.Value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the display name of the ViewModel, primarily used for debugging purposes.
