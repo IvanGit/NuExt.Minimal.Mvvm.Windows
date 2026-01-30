@@ -122,9 +122,10 @@ namespace Minimal.Mvvm.Windows
             if (IsEnabled == false) return;
             try
             {
-                if (File.Exists(FilePath))
+                var path = FilePath;
+                if (File.Exists(path))
                 {
-                    var s = File.ReadAllText(FilePath);
+                    var s = File.ReadAllText(path);
                     if (window.SetPlacement(s))
                     {
                         OnPlacementRestored(this, EventArgs.Empty);
@@ -175,21 +176,15 @@ namespace Minimal.Mvvm.Windows
 
         #region Methods
 
-        /// <inheritdoc />
-        protected override void OnAttached()
-        {
-            base.OnAttached();
-            if (string.IsNullOrWhiteSpace(FileName))
-            {
-                FileName = $"{AssociatedObject!.GetType().Name}";
-            }
-        }
-
         private string GetFileName()
         {
-            ArgumentException.ThrowIfNullOrEmpty(FileName);
-            if (Path.HasExtension(FileName)) return IOUtils.ClearFileName(FileName)!;
-            return IOUtils.ClearFileName(FileName) + ".json";
+            var fileName = FileName;
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                fileName = $"{AssociatedObject!.GetType().Name}";
+            }
+            if (Path.HasExtension(fileName)) return IOUtils.SanitizeFileName(fileName)!;
+            return IOUtils.SanitizeFileName(fileName) + ".json";
         }
 
         private void InternalSavePlacement(Window? window)

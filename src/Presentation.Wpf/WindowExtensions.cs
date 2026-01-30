@@ -16,7 +16,7 @@ namespace System.Windows
             WriteIndented = true,
             Converters = 
             {
-                new RectangleJsonConverter()
+                new JsonRectangleConverter()
             }
         };
 

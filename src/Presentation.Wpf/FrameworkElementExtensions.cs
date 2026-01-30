@@ -1,4 +1,7 @@
-﻿namespace System.Windows
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace System.Windows
 {
     public static class FrameworkElementExtensions
     {

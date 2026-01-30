@@ -3,7 +3,6 @@
                     xmlns:minimal="http://schemas.minimalmvvm.com/winfx/xaml/mvvm"
                     xmlns:services="clr-namespace:MovieWpfApp.Services">
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/NuExt.System.Windows;component/Styles/Styles.xaml" />
         <ResourceDictionary Source="pack://application:,,,/NuExt.Minimal.Mvvm.Windows;component/Styles/Styles.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Styles/Styles.xaml" />
     </ResourceDictionary.MergedDictionaries>

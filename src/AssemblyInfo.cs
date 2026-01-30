@@ -14,3 +14,5 @@ using System.Windows.Markup;
 [assembly: XmlnsDefinition("http://schemas.minimalmvvm.com/winfx/xaml/mvvm", "Minimal.Mvvm")]
 [assembly: XmlnsDefinition("http://schemas.minimalmvvm.com/winfx/xaml/mvvm", "Minimal.Mvvm.Windows")]
 [assembly: XmlnsDefinition("http://schemas.minimalmvvm.com/winfx/xaml/mvvm", "Minimal.Mvvm.Windows.Controls")]
+[assembly: XmlnsDefinition("http://schemas.microsoft.com/winfx/2006/xaml/presentation", "System.Windows")]
+[assembly: XmlnsDefinition("http://schemas.microsoft.com/winfx/2006/xaml/presentation", "System.Windows.Controls")]
